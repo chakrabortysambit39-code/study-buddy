@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="page-shell">
+        <section class="hero">
+            <div class="brand">🧠 Study Buddy</div>
+            <p class="eyebrow">YOUR PERSONAL STUDY PARTNER</p>
+            <h1>Learn smarter.<br><span>Study better.</span></h1>
+            <p class="subtitle">Pick a subject and start your first quiz.</p>
+        </section>
+
+        <section class="subject-grid">
+            {% for key, subject in subjects.items() %}
+            <a class="subject-card" href="{{ url_for('quiz', subject=key) }}">
+                <div class="subject-icon">{{ subject.emoji }}</div>
+                <div>
+                    <h2>{{ subject.name }}</h2>
+                    <p>3 practice questions</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+            {% endfor %}
+        </section>
+
+        <section class="feature-strip">
+            <div><strong>🎯 Quiz</strong><span>Practice and score</span></div>
+            <div><strong>🤖 AI Tutor</strong><span>Coming next</span></div>
+            <div><strong>📊 Progress</strong><span>Coming next</span></div>
+        </section>
+    </main>
+</body>
+</html>
