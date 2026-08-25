@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results • Study Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="results-shell">
+        <a class="back-link" href="{{ url_for('home') }}">← Back to home</a>
+
+        <section class="result-hero">
+            <div class="result-emoji">{% if percentage == 100 %}🏆{% elif percentage >= 60 %}🎉{% else %}💪{% endif %}</div>
+            <p class="eyebrow">QUIZ COMPLETE</p>
+            <h1>{{ subject.name }} Results</h1>
+            <div class="score-circle"><strong>{{ percentage }}%</strong><span>{{ score }}/{{ total }}</span></div>
+            <p class="result-message">
+                {% if percentage == 100 %}Perfect score! Amazing work.
+                {% elif percentage >= 60 %}Nice work! Keep practicing and you'll go even higher.
+                {% else %}Good attempt! Review the answers below and try again.
+                {% endif %}
+            </p>
+            <a class="primary-button inline-button" href="{{ url_for('quiz', subject=request.path.split('/')[2]) }}">Try Again →</a>
+        </section>
+
+        <section class="review-list">
+            <h2>Answer Review</h2>
+            {% for item in results %}
+            <article class="review-card {% if item.correct %}correct{% else %}incorrect{% endif %}">
+                <div class="review-status">{% if item.correct %}✓ Correct{% else %}✕ Review{% endif %}</div>
+                <h3>{{ loop.index }}. {{ item.question }}</h3>
+                <p>Your answer: <strong>{{ item.selected or 'No answer' }}</strong></p>
+                {% if not item.correct %}<p>Correct answer: <strong>{{ item.answer }}</strong></p>{% endif %}
+            </article>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>
