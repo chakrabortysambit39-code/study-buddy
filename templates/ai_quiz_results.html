@@ -11,7 +11,8 @@
         <a class="back-link" href="{{ url_for('generate_quiz') }}">← Generate another quiz</a>
         <section class="hero-card results-hero">
             <p class="eyebrow">AI QUIZ COMPLETE</p>
-            <h1>Grade {{ grade }} • {{ subject }} 🎉</h1>
+            <h1>{{ subject }} 🎉</h1>
+            {% if grade %}<p>Grade {{ grade }}</p>{% endif %}
             <div class="score-big">{{ score }} / {{ total }}</div>
             <p>{{ percentage }}% correct</p>
         </section>
@@ -21,7 +22,6 @@
             <div class="question-number">QUESTION {{ loop.index }}</div>
             {% if result.correct %}
             <h2>✅ Correct</h2>
-            <p>Your answer: <strong>{{ result.selected }}</strong></p>
             {% else %}
             <h2>❌ Needs review</h2>
             <p>Your answer: <strong>{{ result.selected }}</strong></p>
