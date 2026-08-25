@@ -3,9 +3,9 @@ from flask import Flask, render_template, request, redirect, url_for
 from services.groq_ai import ai
 from services.quiz_generator import quiz_generator
 from services.homework_scanner import homework_scanner
+from services.notes import list_notes, create_note, delete_note
 
 app = Flask(__name__)
-# Keep uploads comfortably below the vision request size limit after base64 encoding.
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
 
 QUESTIONS = {
@@ -153,6 +153,28 @@ def homework_quiz():
     questions = quiz_data.get("questions", []) if quiz_data else None
     form = {"grade": grade, "subject": subject, "topic": "Homework", "difficulty": "medium", "count": "5"}
     return render_template("generate_quiz.html", form=form, questions=questions, error=error, grades=grade_options())
+
+
+@app.route("/notes", methods=["GET", "POST"])
+def notes():
+    note = None
+    error = None
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        subject = request.form.get("subject", "General").strip() or "General"
+        content = request.form.get("content", "").strip()
+        if not title or not content:
+            error = "Please enter both a title and some notes."
+        else:
+            create_note(title, subject, content)
+            return redirect(url_for("notes"))
+    return render_template("notes.html", notes=list_notes(), note=note, error=error)
+
+
+@app.route("/notes/delete/<int:note_id>", methods=["POST"])
+def delete_note_route(note_id):
+    delete_note(note_id)
+    return redirect(url_for("notes"))
 
 
 @app.errorhandler(413)
