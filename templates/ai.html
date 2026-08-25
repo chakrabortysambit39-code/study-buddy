@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor • Study Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="quiz-shell">
+        <a class="back-link" href="{{ url_for('home') }}">← Back to Study Buddy</a>
+        <section class="hero-card">
+            <p class="eyebrow">AI STUDY TUTOR</p>
+            <h1>Ask Study Buddy 🤖</h1>
+            <p>Ask for an explanation, example, summary, or study help.</p>
+            <form method="POST" class="ai-form">
+                <textarea name="prompt" placeholder="Example: Explain photosynthesis in simple words..." required>{{ prompt }}</textarea>
+                <button class="primary-button" type="submit">Ask AI →</button>
+            </form>
+        </section>
+
+        {% if answer %}
+        <section class="question-card ai-answer">
+            <div class="question-number">STUDY BUDDY</div>
+            <div class="answer-text">{{ answer }}</div>
+        </section>
+        {% endif %}
+    </main>
+</body>
+</html>
