@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quiz Generator • Study Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="quiz-shell">
+        <a class="back-link" href="{{ url_for('home') }}">← Back to Study Buddy</a>
+
+        <section class="hero-card">
+            <p class="eyebrow">V2 • AI QUIZ GENERATOR</p>
+            <h1>Build a quiz with AI 🧠</h1>
+            <p>Choose a subject, topic, difficulty, and number of questions.</p>
+
+            <form method="POST" class="generator-grid">
+                <label>
+                    Subject
+                    <input name="subject" value="{{ form.subject }}" placeholder="Maths" required>
+                </label>
+                <label>
+                    Topic
+                    <input name="topic" value="{{ form.topic }}" placeholder="Fractions, photosynthesis, grammar...">
+                </label>
+                <label>
+                    Difficulty
+                    <select name="difficulty">
+                        {% for level in ["easy", "medium", "hard"] %}
+                        <option value="{{ level }}" {% if form.difficulty == level %}selected{% endif %}>{{ level|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Questions
+                    <select name="count">
+                        {% for n in range(3, 11) %}
+                        <option value="{{ n }}" {% if form.count|int == n %}selected{% endif %}>{{ n }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button class="primary-button" type="submit">Generate Quiz →</button>
+            </form>
+        </section>
+
+        {% if error %}
+        <section class="question-card error-card">
+            <strong>⚠️ {{ error }}</strong>
+        </section>
+        {% endif %}
+
+        {% if questions %}
+        <form method="POST" action="{{ url_for('ai_quiz_results') }}">
+            <input type="hidden" name="subject" value="{{ form.subject }}">
+            {% for q in questions %}
+            <section class="question-card">
+                <div class="question-number">QUESTION {{ loop.index }}</div>
+                <h2>{{ q.question }}</h2>
+                <div class="options">
+                    {% for option in q.options %}
+                    <label class="option">
+                        <input type="radio" name="q{{ loop.index0 }}" value="{{ option }}" required>
+                        <span>{{ option }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <details class="explanation">
+                    <summary>View explanation</summary>
+                    <p>{{ q.explanation }}</p>
+                </details>
+                <input type="hidden" name="answer{{ loop.index0 }}" value="{{ q.answer }}">
+            </section>
+            {% endfor %}
+            <input type="hidden" name="total" value="{{ questions|length }}">
+            <button class="primary-button" type="submit">Finish AI Quiz →</button>
+        </form>
+        {% endif %}
+    </main>
+</body>
+</html>
