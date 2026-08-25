@@ -106,5 +106,32 @@ def generate_quiz():
     return render_template("generate_quiz.html", questions=questions, error=error, form=form)
 
 
+@app.route("/ai-quiz-results", methods=["POST"])
+def ai_quiz_results():
+    try:
+        total = int(request.form.get("total", "0"))
+    except ValueError:
+        total = 0
+
+    score = 0
+    results_data = []
+    for index in range(total):
+        selected = request.form.get(f"q{index}")
+        answer = request.form.get(f"answer{index}")
+        correct = selected == answer
+        score += int(correct)
+        results_data.append({"selected": selected, "answer": answer, "correct": correct})
+
+    percentage = round((score / total) * 100) if total else 0
+    return render_template(
+        "ai_quiz_results.html",
+        subject=request.form.get("subject", "AI Quiz"),
+        score=score,
+        total=total,
+        percentage=percentage,
+        results=results_data,
+    )
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
