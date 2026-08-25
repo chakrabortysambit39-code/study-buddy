@@ -12,30 +12,23 @@ def _connect():
 
 def init_db():
     with _connect() as connection:
-        connection.execute(
-            """CREATE TABLE IF NOT EXISTS notes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                subject TEXT NOT NULL,
-                content TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )"""
-        )
+        connection.execute("""CREATE TABLE IF NOT EXISTS notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            subject TEXT NOT NULL,
+            content TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )""")
 
 
 def list_notes():
     with _connect() as connection:
-        return connection.execute(
-            "SELECT id, title, subject, content, created_at FROM notes ORDER BY id DESC"
-        ).fetchall()
+        return connection.execute("SELECT id, title, subject, content, created_at FROM notes ORDER BY id DESC").fetchall()
 
 
 def create_note(title, subject, content):
     with _connect() as connection:
-        cursor = connection.execute(
-            "INSERT INTO notes (title, subject, content) VALUES (?, ?, ?)",
-            (title, subject, content),
-        )
+        cursor = connection.execute("INSERT INTO notes (title, subject, content) VALUES (?, ?, ?)", (title, subject, content))
         return cursor.lastrowid
 
 
