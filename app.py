@@ -90,6 +90,7 @@ def ai_tutor():
 @app.route("/generate-quiz", methods=["GET", "POST"])
 def generate_quiz():
     form = {
+        "grade": request.form.get("grade", "7").strip(),
         "subject": request.form.get("subject", "Science").strip(),
         "topic": request.form.get("topic", "").strip(),
         "difficulty": request.form.get("difficulty", "medium").lower(),
@@ -108,6 +109,7 @@ def generate_quiz():
                 count = 5
 
             quiz_data, error = quiz_generator.generate(
+                form["grade"],
                 form["subject"],
                 form["topic"],
                 form["difficulty"],
@@ -135,9 +137,11 @@ def ai_quiz_results():
 
     percentage = round(score / total * 100)
     subject = request.form.get("subject", "AI Quiz")
+    grade = request.form.get("grade", "")
     return render_template(
         "ai_quiz_results.html",
         subject=subject,
+        grade=grade,
         score=score,
         total=total,
         percentage=percentage,
