@@ -5,7 +5,7 @@ from groq import Groq
 
 class GroqAI:
     def __init__(self):
-        self.model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+        self.model = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
         self.client = None
         self.api_key = os.getenv("GROQ_API_KEY")
 
@@ -29,12 +29,12 @@ class GroqAI:
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0.4,
-                max_tokens=700,
+                max_completion_tokens=700,
             )
             return response.choices[0].message.content.strip()
         except Exception as exc:
-            print(f"Groq API error: {exc}")
-            return "I couldn't reach the AI service right now. Please check the Groq API key and Render logs."
+            print(f"Groq API error: {type(exc).__name__}: {exc}")
+            return "AI request failed. Check the Groq API key, model setting, and Render logs."
 
 
 ai = GroqAI()
