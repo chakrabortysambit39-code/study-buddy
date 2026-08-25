@@ -84,5 +84,27 @@ def ai_tutor():
     return render_template("ai.html", answer=answer, prompt=prompt)
 
 
+@app.route("/generate-quiz", methods=["GET", "POST"])
+def generate_quiz():
+    questions = None
+    error = None
+    form = {"subject": "Maths", "topic": "", "difficulty": "medium", "count": "5"}
+
+    if request.method == "POST":
+        form["subject"] = request.form.get("subject", "Maths").strip()
+        form["topic"] = request.form.get("topic", "").strip()
+        form["difficulty"] = request.form.get("difficulty", "medium").strip().lower()
+        try:
+            form["count"] = str(max(3, min(10, int(request.form.get("count", "5")))))
+        except ValueError:
+            form["count"] = "5"
+
+        questions, error = ai.generate_quiz(
+            form["subject"], form["topic"], form["difficulty"], int(form["count"])
+        )
+
+    return render_template("generate_quiz.html", questions=questions, error=error, form=form)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
