@@ -4,6 +4,7 @@ from services.groq_ai import ai
 from services.quiz_generator import quiz_generator
 from services.homework_scanner import homework_scanner
 from services.notes import list_notes, create_note, delete_note
+from services.progress import stats, record
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
@@ -48,6 +49,11 @@ def home():
     return render_template("index.html", subjects=SUBJECTS)
 
 
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html", stats=stats())
+
+
 @app.route("/quiz/<subject>")
 def quiz(subject):
     if subject not in QUESTIONS:
@@ -68,6 +74,7 @@ def results(subject):
         if correct:
             score += 1
         results_data.append({**question, "selected": selected, "correct": correct})
+    record("quiz", 20, score, len(questions))
     percentage = round((score / len(questions)) * 100) if questions else 0
     return render_template("results.html", subject=SUBJECTS[subject], score=score, total=len(questions), percentage=percentage, results=results_data)
 
@@ -85,13 +92,7 @@ def ai_tutor():
 
 @app.route("/generate-quiz", methods=["GET", "POST"])
 def generate_quiz():
-    form = {
-        "grade": request.form.get("grade", "7").strip(),
-        "subject": request.form.get("subject", "Science").strip(),
-        "topic": request.form.get("topic", "").strip(),
-        "difficulty": request.form.get("difficulty", "medium").lower(),
-        "count": request.form.get("count", "5"),
-    }
+    form = {"grade": request.form.get("grade", "7").strip(), "subject": request.form.get("subject", "Science").strip(), "topic": request.form.get("topic", "").strip(), "difficulty": request.form.get("difficulty", "medium").lower(), "count": request.form.get("count", "5")}
     questions = None
     error = None
     if request.method == "POST":
@@ -120,10 +121,9 @@ def ai_quiz_results():
         if correct:
             score += 1
         results_data.append({"selected": selected, "answer": answer, "correct": correct})
+    record("ai_quiz", 30, score, total)
     percentage = round(score / total * 100)
-    subject = request.form.get("subject", "AI Quiz")
-    grade = request.form.get("grade", "")
-    return render_template("ai_quiz_results.html", subject=subject, grade=grade, score=score, total=total, percentage=percentage, results=results_data)
+    return render_template("ai_quiz_results.html", subject=request.form.get("subject", "AI Quiz"), grade=request.form.get("grade", ""), score=score, total=total, percentage=percentage, results=results_data)
 
 
 @app.route("/homework", methods=["GET", "POST"])
@@ -167,6 +167,7 @@ def notes():
             error = "Please enter both a title and some notes."
         else:
             create_note(title, subject, content)
+            record("note", 10)
             return redirect(url_for("notes"))
     return render_template("notes.html", notes=list_notes(), note=note, error=error)
 
