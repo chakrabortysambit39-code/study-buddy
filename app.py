@@ -1,11 +1,11 @@
-import json
-
 from flask import Flask, render_template, request, redirect, url_for
 
 from services.groq_ai import ai
 from services.quiz_generator import quiz_generator
+from services.homework_scanner import homework_scanner
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
 
 QUESTIONS = {
     "maths": [
@@ -38,6 +38,10 @@ SUBJECTS = {
 }
 
 
+def grade_options():
+    return [str(i) for i in range(1, 13)]
+
+
 @app.route("/")
 def home():
     return render_template("index.html", subjects=SUBJECTS)
@@ -54,7 +58,6 @@ def quiz(subject):
 def results(subject):
     if subject not in QUESTIONS:
         return redirect(url_for("home"))
-
     questions = QUESTIONS[subject]
     score = 0
     results_data = []
@@ -64,16 +67,8 @@ def results(subject):
         if correct:
             score += 1
         results_data.append({**question, "selected": selected, "correct": correct})
-
     percentage = round((score / len(questions)) * 100) if questions else 0
-    return render_template(
-        "results.html",
-        subject=SUBJECTS[subject],
-        score=score,
-        total=len(questions),
-        percentage=percentage,
-        results=results_data,
-    )
+    return render_template("results.html", subject=SUBJECTS[subject], score=score, total=len(questions), percentage=percentage, results=results_data)
 
 
 @app.route("/ai", methods=["GET", "POST"])
@@ -98,7 +93,6 @@ def generate_quiz():
     }
     questions = None
     error = None
-
     if request.method == "POST":
         if not form["topic"]:
             error = "Please enter a topic first."
@@ -107,18 +101,10 @@ def generate_quiz():
                 count = int(form["count"])
             except ValueError:
                 count = 5
-
-            quiz_data, error = quiz_generator.generate(
-                form["grade"],
-                form["subject"],
-                form["topic"],
-                form["difficulty"],
-                count,
-            )
+            quiz_data, error = quiz_generator.generate(form["grade"], form["subject"], form["topic"], form["difficulty"], count)
             if quiz_data:
                 questions = quiz_data.get("questions", [])
-
-    return render_template("generate_quiz.html", form=form, questions=questions, error=error)
+    return render_template("generate_quiz.html", form=form, questions=questions, error=error, grades=grade_options())
 
 
 @app.route("/ai-quiz-results", methods=["POST"])
@@ -126,7 +112,6 @@ def ai_quiz_results():
     total = max(1, int(request.form.get("total", "1")))
     score = 0
     results_data = []
-
     for index in range(total):
         selected = request.form.get(f"q{index}")
         answer = request.form.get(f"answer{index}")
@@ -134,19 +119,44 @@ def ai_quiz_results():
         if correct:
             score += 1
         results_data.append({"selected": selected, "answer": answer, "correct": correct})
-
     percentage = round(score / total * 100)
     subject = request.form.get("subject", "AI Quiz")
     grade = request.form.get("grade", "")
-    return render_template(
-        "ai_quiz_results.html",
-        subject=subject,
-        grade=grade,
-        score=score,
-        total=total,
-        percentage=percentage,
-        results=results_data,
-    )
+    return render_template("ai_quiz_results.html", subject=subject, grade=grade, score=score, total=total, percentage=percentage, results=results_data)
+
+
+@app.route("/homework", methods=["GET", "POST"])
+def homework():
+    form = {"grade": request.form.get("grade", "7").strip(), "subject": request.form.get("subject", "Science").strip()}
+    result = None
+    error = None
+    if request.method == "POST":
+        image = request.files.get("homework_image")
+        if not image or not image.filename:
+            error = "Please choose a homework image first."
+        elif image.mimetype not in {"image/jpeg", "image/png", "image/webp"}:
+            error = "Please upload a JPG, PNG, or WebP image."
+        else:
+            result, error = homework_scanner.scan(image.read(), image.mimetype, form["grade"], form["subject"])
+    return render_template("homework.html", form=form, result=result, error=error, grades=grade_options())
+
+
+@app.route("/homework-quiz", methods=["POST"])
+def homework_quiz():
+    source_text = request.form.get("source_text", "").strip()
+    grade = request.form.get("grade", "7").strip()
+    subject = request.form.get("subject", "General").strip()
+    if not source_text:
+        return redirect(url_for("homework"))
+    quiz_data, error = quiz_generator.generate_from_source(grade, subject, source_text, 5)
+    questions = quiz_data.get("questions", []) if quiz_data else None
+    form = {"grade": grade, "subject": subject, "topic": "Homework", "difficulty": "medium", "count": "5"}
+    return render_template("generate_quiz.html", form=form, questions=questions, error=error, grades=grade_options())
+
+
+@app.errorhandler(413)
+def too_large(_error):
+    return render_template("homework.html", form={"grade": "7", "subject": "Science"}, result=None, error="That image is too large. Please upload an image under 20 MB.", grades=grade_options()), 413
 
 
 if __name__ == "__main__":
