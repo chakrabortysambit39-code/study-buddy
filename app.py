@@ -1,6 +1,9 @@
+import json
+
 from flask import Flask, render_template, request, redirect, url_for
 
 from services.groq_ai import ai
+from services.quiz_generator import quiz_generator
 
 app = Flask(__name__)
 
@@ -86,46 +89,55 @@ def ai_tutor():
 
 @app.route("/generate-quiz", methods=["GET", "POST"])
 def generate_quiz():
+    form = {
+        "subject": request.form.get("subject", "Science").strip(),
+        "topic": request.form.get("topic", "").strip(),
+        "difficulty": request.form.get("difficulty", "medium").lower(),
+        "count": request.form.get("count", "5"),
+    }
     questions = None
     error = None
-    form = {"subject": "Maths", "topic": "", "difficulty": "medium", "count": "5"}
 
     if request.method == "POST":
-        form["subject"] = request.form.get("subject", "Maths").strip()
-        form["topic"] = request.form.get("topic", "").strip()
-        form["difficulty"] = request.form.get("difficulty", "medium").strip().lower()
-        try:
-            form["count"] = str(max(3, min(10, int(request.form.get("count", "5")))))
-        except ValueError:
-            form["count"] = "5"
+        if not form["topic"]:
+            error = "Please enter a topic first."
+        else:
+            try:
+                count = int(form["count"])
+            except ValueError:
+                count = 5
 
-        questions, error = ai.generate_quiz(
-            form["subject"], form["topic"], form["difficulty"], int(form["count"])
-        )
+            quiz_data, error = quiz_generator.generate(
+                form["subject"],
+                form["topic"],
+                form["difficulty"],
+                count,
+            )
+            if quiz_data:
+                questions = quiz_data.get("questions", [])
 
-    return render_template("generate_quiz.html", questions=questions, error=error, form=form)
+    return render_template("generate_quiz.html", form=form, questions=questions, error=error)
 
 
 @app.route("/ai-quiz-results", methods=["POST"])
 def ai_quiz_results():
-    try:
-        total = int(request.form.get("total", "0"))
-    except ValueError:
-        total = 0
-
+    total = max(1, int(request.form.get("total", "1")))
     score = 0
     results_data = []
+
     for index in range(total):
         selected = request.form.get(f"q{index}")
         answer = request.form.get(f"answer{index}")
         correct = selected == answer
-        score += int(correct)
+        if correct:
+            score += 1
         results_data.append({"selected": selected, "answer": answer, "correct": correct})
 
-    percentage = round((score / total) * 100) if total else 0
+    percentage = round(score / total * 100)
+    subject = request.form.get("subject", "AI Quiz")
     return render_template(
         "ai_quiz_results.html",
-        subject=request.form.get("subject", "AI Quiz"),
+        subject=subject,
         score=score,
         total=total,
         percentage=percentage,
