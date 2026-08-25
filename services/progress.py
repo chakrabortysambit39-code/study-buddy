@@ -1,38 +1,17 @@
-import os
-import sqlite3
 from datetime import date, timedelta
-
-DB_PATH = os.getenv("STUDY_BUDDY_DB", "study_buddy.db")
-
-
-def _connect():
-    connection = sqlite3.connect(DB_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
+from services.database import connection
 
 
-def init_db():
-    with _connect() as connection:
-        connection.execute("""CREATE TABLE IF NOT EXISTS activity (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            kind TEXT NOT NULL,
-            xp INTEGER NOT NULL DEFAULT 0,
-            score INTEGER,
-            total INTEGER,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )""")
+def record(user_id, kind, xp, score=None, total=None):
+    with connection() as conn:
+        conn.execute("INSERT INTO activity (user_id, kind, xp, score, total) VALUES (%s, %s, %s, %s, %s)", (user_id, kind, xp, score, total))
 
 
-def record(kind, xp, score=None, total=None):
-    with _connect() as connection:
-        connection.execute("INSERT INTO activity (kind, xp, score, total) VALUES (?, ?, ?, ?)", (kind, xp, score, total))
-
-
-def stats():
-    with _connect() as connection:
-        row = connection.execute("SELECT COALESCE(SUM(xp),0) xp, COUNT(CASE WHEN kind LIKE '%quiz%' THEN 1 END) quizzes, COALESCE(SUM(score),0) score, COALESCE(SUM(total),0) total FROM activity").fetchone()
-        days = connection.execute("SELECT DISTINCT date(created_at) day FROM activity ORDER BY day DESC").fetchall()
-    active_days = {date.fromisoformat(r["day"]) for r in days if r["day"]}
+def stats(user_id):
+    with connection() as conn:
+        row = conn.execute("SELECT COALESCE(SUM(xp),0) AS xp, COUNT(CASE WHEN kind LIKE '%%quiz%%' THEN 1 END) AS quizzes, COALESCE(SUM(score),0) AS score, COALESCE(SUM(total),0) AS total FROM activity WHERE user_id = %s", (user_id,)).fetchone()
+        days = conn.execute("SELECT DISTINCT (created_at AT TIME ZONE 'UTC')::date AS day FROM activity WHERE user_id = %s ORDER BY day DESC", (user_id,)).fetchall()
+    active_days = {r["day"] for r in days if r["day"]}
     streak = 0
     current = date.today()
     if current not in active_days and current - timedelta(days=1) in active_days:
@@ -41,14 +20,4 @@ def stats():
         streak += 1
         current -= timedelta(days=1)
     xp = row["xp"] or 0
-    return {
-        "xp": xp,
-        "level": xp // 100 + 1,
-        "level_progress": xp % 100,
-        "quizzes": row["quizzes"] or 0,
-        "accuracy": round((row["score"] / row["total"]) * 100) if row["total"] else 0,
-        "streak": streak,
-    }
-
-
-init_db()
+    return {"xp": xp, "level": xp // 100 + 1, "level_progress": xp % 100, "quizzes": row["quizzes"] or 0, "accuracy": round((row["score"] / row["total"]) * 100) if row["total"] else 0, "streak": streak}
