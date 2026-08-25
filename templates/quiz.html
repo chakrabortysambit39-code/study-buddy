@@ -26,7 +26,7 @@
                 <div class="options">
                     {% for option in q.options %}
                     <label class="option">
-                        <input type="radio" name="q{{ loop.parent.index0 if loop.parent is defined else '' }}" value="{{ option }}" required>
+                        <input type="radio" name="q{{ loop.index0 }}" value="{{ option }}" required>
                         <span>{{ option }}</span>
                     </label>
                     {% endfor %}
