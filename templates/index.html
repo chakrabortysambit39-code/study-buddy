@@ -12,8 +12,11 @@
             <div class="brand">🧠 Study Buddy</div>
             <p class="eyebrow">YOUR PERSONAL STUDY PARTNER</p>
             <h1>Learn smarter.<br><span>Study better.</span></h1>
-            <p class="subtitle">Pick a subject, practice, or ask your AI tutor.</p>
-            <a class="primary-button inline-button" href="{{ url_for('ai_tutor') }}">🤖 Ask AI Tutor</a>
+            <p class="subtitle">Practice, ask your AI tutor, or build a custom quiz.</p>
+            <div class="hero-actions">
+                <a class="primary-button inline-button" href="{{ url_for('ai_tutor') }}">🤖 Ask AI Tutor</a>
+                <a class="secondary-button inline-button" href="{{ url_for('generate_quiz') }}">🧠 Generate AI Quiz</a>
+            </div>
         </section>
 
         <section class="subject-grid">
@@ -32,7 +35,7 @@
         <section class="feature-strip">
             <div><strong>🎯 Quiz</strong><span>Practice and score</span></div>
             <div><strong>🤖 AI Tutor</strong><span>Ask anything</span></div>
-            <div><strong>📊 Progress</strong><span>Coming next</span></div>
+            <div><strong>🧠 AI Quiz</strong><span>Generate custom tests</span></div>
         </section>
     </main>
 </body>
