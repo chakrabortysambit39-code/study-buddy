@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quiz Results • Study Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="quiz-shell">
+        <a class="back-link" href="{{ url_for('generate_quiz') }}">← Generate another quiz</a>
+        <section class="hero-card results-hero">
+            <p class="eyebrow">AI QUIZ COMPLETE</p>
+            <h1>{{ subject }} 🎉</h1>
+            <div class="score-big">{{ score }} / {{ total }}</div>
+            <p>{{ percentage }}% correct</p>
+        </section>
+
+        {% for result in results %}
+        <section class="question-card">
+            <div class="question-number">QUESTION {{ loop.index }}</div>
+            {% if result.correct %}
+            <h2>✅ Correct</h2>
+            {% else %}
+            <h2>❌ Needs review</h2>
+            <p>Your answer: <strong>{{ result.selected }}</strong></p>
+            <p>Correct answer: <strong>{{ result.answer }}</strong></p>
+            {% endif %}
+        </section>
+        {% endfor %}
+
+        <a class="primary-button inline-button" href="{{ url_for('home') }}">Back to Study Buddy</a>
+    </main>
+</body>
+</html>
