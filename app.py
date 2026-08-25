@@ -5,7 +5,8 @@ from services.quiz_generator import quiz_generator
 from services.homework_scanner import homework_scanner
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
+# Keep uploads comfortably below the vision request size limit after base64 encoding.
+app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
 
 QUESTIONS = {
     "maths": [
@@ -156,7 +157,7 @@ def homework_quiz():
 
 @app.errorhandler(413)
 def too_large(_error):
-    return render_template("homework.html", form={"grade": "7", "subject": "Science"}, result=None, error="That image is too large. Please upload an image under 20 MB.", grades=grade_options()), 413
+    return render_template("homework.html", form={"grade": "7", "subject": "Science"}, result=None, error="That image is too large. Please upload an image under 15 MB.", grades=grade_options()), 413
 
 
 if __name__ == "__main__":
