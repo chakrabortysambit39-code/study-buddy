@@ -13,16 +13,24 @@
         <section class="hero-card">
             <p class="eyebrow">V2 • AI QUIZ GENERATOR</p>
             <h1>Build a quiz with AI 🧠</h1>
-            <p>Choose a subject, topic, difficulty, and number of questions.</p>
+            <p>Choose your grade, subject, topic, difficulty, and number of questions.</p>
 
             <form method="POST" class="generator-grid">
+                <label>
+                    Grade
+                    <select name="grade">
+                        {% for grade in range(1, 13) %}
+                        <option value="{{ grade }}" {% if form.grade == grade|string %}selected{% endif %}>Grade {{ grade }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
                 <label>
                     Subject
                     <input name="subject" value="{{ form.subject }}" placeholder="Maths" required>
                 </label>
                 <label>
                     Topic
-                    <input name="topic" value="{{ form.topic }}" placeholder="Fractions, photosynthesis, grammar...">
+                    <input name="topic" value="{{ form.topic }}" placeholder="Fractions, photosynthesis, grammar..." required>
                 </label>
                 <label>
                     Difficulty
@@ -53,6 +61,7 @@
         {% if questions %}
         <form method="POST" action="{{ url_for('ai_quiz_results') }}">
             <input type="hidden" name="subject" value="{{ form.subject }}">
+            <input type="hidden" name="grade" value="{{ form.grade }}">
             {% for q in questions %}
             {% set question_index = loop.index0 %}
             <section class="question-card">
