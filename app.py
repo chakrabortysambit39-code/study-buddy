@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 
+from services.groq_ai import ai
+
 app = Flask(__name__)
 
 QUESTIONS = {
@@ -69,6 +71,17 @@ def results(subject):
         percentage=percentage,
         results=results_data,
     )
+
+
+@app.route("/ai", methods=["GET", "POST"])
+def ai_tutor():
+    answer = None
+    prompt = ""
+    if request.method == "POST":
+        prompt = request.form.get("prompt", "").strip()
+        if prompt:
+            answer = ai.ask(prompt)
+    return render_template("ai.html", answer=answer, prompt=prompt)
 
 
 if __name__ == "__main__":
