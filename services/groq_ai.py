@@ -21,14 +21,10 @@ class GroqAI:
         client = self._get_client()
         if not client:
             return "Groq AI is not configured yet. Add GROQ_API_KEY in Render Environment Variables."
-
         try:
             response = client.chat.completions.create(
                 model=self.model,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": prompt},
-                ],
+                messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
                 temperature=0.4,
                 max_completion_tokens=700,
             )
@@ -37,82 +33,40 @@ class GroqAI:
             print(f"Groq API error: {exc}")
             return "I couldn't reach the AI service right now. Please check the Groq API key and Render logs."
 
-    def generate_quiz(self, subject, topic, difficulty, count):
+    def generate_notes(self, grade, subject, topic, detail="medium"):
         client = self._get_client()
         if not client:
             return None, "Groq AI is not configured yet."
-
         schema = {
             "type": "object",
-            "properties": {
-                "questions": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "question": {"type": "string"},
-                            "options": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                                "minItems": 4,
-                                "maxItems": 4,
-                            },
-                            "answer": {"type": "string"},
-                            "explanation": {"type": "string"},
-                        },
-                        "required": ["question", "options", "answer", "explanation"],
-                        "additionalProperties": False,
-                    },
-                }
-            },
-            "required": ["questions"],
+            "properties": {"title": {"type": "string"}, "content": {"type": "string"}},
+            "required": ["title", "content"],
             "additionalProperties": False,
         }
+        prompt = f"""Create clear school study notes for Grade {grade}.
+Subject: {subject}
+Topic: {topic}
+Detail level: {detail}
 
-        prompt = (
-            f"Create exactly {count} multiple-choice questions for a student. "
-            f"Subject: {subject}. Topic: {topic or 'general ' + subject}. "
-            f"Difficulty: {difficulty}. "
-            "Each question must have exactly 4 distinct options and exactly one correct answer. "
-            "The answer must exactly match one option. Give a short educational explanation. "
-            "Avoid trick questions, ambiguity, and unsafe content."
-        )
-
+Use simple, age-appropriate language. Include a short overview, key concepts, important facts, examples where useful, and a quick revision section. Use readable headings and bullet points. Do not invent facts. Return only the note title and note content."""
         try:
             response = client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert school quiz generator. Return only the requested structured quiz.",
-                    },
+                    {"role": "system", "content": "You are Study Buddy's expert school-notes generator."},
                     {"role": "user", "content": prompt},
                 ],
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": "study_quiz",
-                        "strict": True,
-                        "schema": schema,
-                    },
-                },
-                temperature=0.5,
+                response_format={"type": "json_schema", "json_schema": {"name": "study_notes", "strict": True, "schema": schema}},
+                temperature=0.4,
                 max_completion_tokens=2500,
             )
             data = json.loads(response.choices[0].message.content or "{}")
-            questions = data.get("questions", [])
-
-            if len(questions) != count:
-                return None, "The AI returned an unexpected number of questions. Please try again."
-
-            for q in questions:
-                if len(q.get("options", [])) != 4 or q.get("answer") not in q.get("options", []):
-                    return None, "The AI returned an invalid question. Please try again."
-
-            return questions, None
+            if not data.get("title") or not data.get("content"):
+                return None, "The AI returned an empty note. Please try again."
+            return data, None
         except Exception as exc:
-            print(f"Groq quiz generation error: {exc}")
-            return None, "I couldn't generate the quiz right now. Please try again."
+            print(f"Groq notes generation error: {exc}")
+            return None, "I couldn't generate the notes right now. Please try again."
 
 
 ai = GroqAI()
