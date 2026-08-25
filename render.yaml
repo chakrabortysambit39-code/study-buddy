@@ -3,4 +3,4 @@ services:
     name: study-buddy
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app_v4:app
+    startCommand: gunicorn app_v5:app
