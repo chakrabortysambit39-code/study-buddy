@@ -6,7 +6,6 @@ from psycopg.rows import dict_row
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-
 class DatabaseNotConfigured(RuntimeError):
     pass
 
@@ -70,4 +69,7 @@ def create_user(name, email, password_hash):
         return conn.execute("INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s) RETURNING id, name, email", (name, email, password_hash)).fetchone()
 
 
-init_db()
+# Database initialization is attempted when DATABASE_URL is present.
+# The web app can still boot so Render can show a useful configuration message.
+if DATABASE_URL:
+    init_db()
