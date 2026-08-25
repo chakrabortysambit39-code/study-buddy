@@ -54,13 +54,14 @@
         <form method="POST" action="{{ url_for('ai_quiz_results') }}">
             <input type="hidden" name="subject" value="{{ form.subject }}">
             {% for q in questions %}
+            {% set question_index = loop.index0 %}
             <section class="question-card">
                 <div class="question-number">QUESTION {{ loop.index }}</div>
                 <h2>{{ q.question }}</h2>
                 <div class="options">
                     {% for option in q.options %}
                     <label class="option">
-                        <input type="radio" name="q{{ loop.index0 }}" value="{{ option }}" required>
+                        <input type="radio" name="q{{ question_index }}" value="{{ option }}" required>
                         <span>{{ option }}</span>
                     </label>
                     {% endfor %}
@@ -69,7 +70,7 @@
                     <summary>View explanation</summary>
                     <p>{{ q.explanation }}</p>
                 </details>
-                <input type="hidden" name="answer{{ loop.index0 }}" value="{{ q.answer }}">
+                <input type="hidden" name="answer{{ question_index }}" value="{{ q.answer }}">
             </section>
             {% endfor %}
             <input type="hidden" name="total" value="{{ questions|length }}">
