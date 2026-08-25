@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notes • Study Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="quiz-shell">
+        <a class="back-link" href="{{ url_for('home') }}">← Back to Study Buddy</a>
+        <section class="hero-card">
+            <p class="eyebrow">MY STUDY NOTES</p>
+            <h1>Notes 📚</h1>
+            <p>Write, organize, and save your study notes.</p>
+        </section>
+        <section class="question-card">
+            <form method="POST" class="generator-grid">
+                <label>Title
+                    <input name="title" value="{{ note.title if note else '' }}" placeholder="e.g. Water Cycle" required>
+                </label>
+                <label>Subject
+                    <input name="subject" value="{{ note.subject if note else 'Science' }}" placeholder="Science">
+                </label>
+                <label class="full-width">Notes
+                    <textarea name="content" rows="12" placeholder="Write your notes here..." required>{{ note.content if note else '' }}</textarea>
+                </label>
+                <button class="primary-button" type="submit">Save Note →</button>
+            </form>
+        </section>
+        {% if notes %}
+        <section class="notes-list">
+            <h2>Saved Notes</h2>
+            {% for item in notes %}
+            <article class="question-card note-card">
+                <div>
+                    <p class="eyebrow">{{ item.subject }}</p>
+                    <h2>{{ item.title }}</h2>
+                    <p>{{ item.content[:220] }}{% if item.content|length > 220 %}...{% endif %}</p>
+                </div>
+                <form method="POST" action="{{ url_for('delete_note', note_id=item.id) }}">
+                    <button class="secondary-button" type="submit">Delete</button>
+                </form>
+            </article>
+            {% endfor %}
+        </section>
+        {% endif %}
+    </main>
+</body>
+</html>
