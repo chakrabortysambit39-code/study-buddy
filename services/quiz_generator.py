@@ -37,17 +37,20 @@ class QuizGenerator:
         self.model = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
         self.client = Groq(api_key=self.api_key) if self.api_key else None
 
-    def generate(self, subject, topic, difficulty, count):
+    def generate(self, grade, subject, topic, difficulty, count):
         if not self.client:
             return None, "Groq AI is not configured. Add GROQ_API_KEY in Render Environment Variables."
 
         count = max(3, min(int(count), 10))
-        prompt = f"""Create a {count}-question multiple-choice quiz for a student.
+        prompt = f"""Create a {count}-question multiple-choice quiz for a Grade {grade} student.
+Grade: {grade}
 Subject: {subject}
 Topic: {topic}
 Difficulty: {difficulty}
 
 Rules:
+- Make every question appropriate for the student's grade level.
+- Match the expected curriculum depth and vocabulary for Grade {grade}.
 - Return exactly {count} questions.
 - Every question must have exactly 4 distinct options.
 - The answer must exactly match one of the four options.
@@ -61,7 +64,7 @@ Rules:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are Study Buddy's quiz generator. Create accurate educational quizzes appropriate for students.",
+                        "content": "You are Study Buddy's quiz generator. Create accurate educational quizzes appropriate for the specified grade level.",
                     },
                     {"role": "user", "content": prompt},
                 ],
