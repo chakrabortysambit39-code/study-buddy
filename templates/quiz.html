@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject.name }} Quiz • Study Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="quiz-shell">
+        <a class="back-link" href="{{ url_for('home') }}">← Back to subjects</a>
+        <header class="quiz-header">
+            <div class="subject-icon large">{{ subject.emoji }}</div>
+            <div>
+                <p class="eyebrow">STUDY BUDDY QUIZ</p>
+                <h1>{{ subject.name }}</h1>
+                <p>Answer all {{ questions|length }} questions.</p>
+            </div>
+        </header>
+
+        <form method="POST" action="{{ url_for('results', subject=subject_key) }}">
+            {% for q in questions %}
+            <section class="question-card">
+                <div class="question-number">QUESTION {{ loop.index }}</div>
+                <h2>{{ q.question }}</h2>
+                <div class="options">
+                    {% for option in q.options %}
+                    <label class="option">
+                        <input type="radio" name="q{{ loop.parent.index0 if loop.parent is defined else '' }}" value="{{ option }}" required>
+                        <span>{{ option }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endfor %}
+            <button class="primary-button" type="submit">Finish Quiz →</button>
+        </form>
+    </main>
+</body>
+</html>
