@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Scanner • Study Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="quiz-shell">
+        <a class="back-link" href="{{ url_for('home') }}">← Back to Study Buddy</a>
+        <section class="hero-card">
+            <p class="eyebrow">V3 • HOMEWORK SCANNER</p>
+            <h1>Turn a photo into help 📸</h1>
+            <p>Upload a clear homework photo. Study Buddy will read the questions, answer them, and explain them.</p>
+            <form method="POST" enctype="multipart/form-data" class="generator-grid">
+                <label>
+                    Grade
+                    <select name="grade">
+                        {% for grade in grades %}
+                        <option value="{{ grade }}" {% if form.grade == grade %}selected{% endif %}>Grade {{ grade }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Subject
+                    <input name="subject" value="{{ form.subject }}" placeholder="Science" required>
+                </label>
+                <label class="file-field">
+                    Homework image
+                    <input type="file" name="homework_image" accept="image/jpeg,image/png,image/webp" required>
+                </label>
+                <button class="primary-button" type="submit">Scan Homework →</button>
+            </form>
+            <p class="upload-note">JPG, PNG, or WebP • maximum 20 MB</p>
+        </section>
+
+        {% if error %}
+        <section class="question-card error-card"><strong>⚠️ {{ error }}</strong></section>
+        {% endif %}
+
+        {% if result %}
+        <section class="hero-card">
+            <p class="eyebrow">HOMEWORK READ</p>
+            <h2>{{ result.title }}</h2>
+            <details class="explanation" open>
+                <summary>View detected text</summary>
+                <p class="answer-text">{{ result.detected_text }}</p>
+            </details>
+        </section>
+
+        {% for item in result.items %}
+        <section class="question-card">
+            <div class="question-number">QUESTION {{ loop.index }}</div>
+            <h2>{{ item.question }}</h2>
+            <p><strong>Answer:</strong> {{ item.answer }}</p>
+            <details class="explanation" open>
+                <summary>Why?</summary>
+                <p>{{ item.explanation }}</p>
+            </details>
+        </section>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('homework_quiz') }}">
+            <input type="hidden" name="grade" value="{{ form.grade }}">
+            <input type="hidden" name="subject" value="{{ form.subject }}">
+            <textarea name="source_text" hidden>{{ result.detected_text }}{% for item in result.items %}
+Question: {{ item.question }}
+Answer: {{ item.answer }}
+Explanation: {{ item.explanation }}
+{% endfor %}</textarea>
+            <button class="primary-button" type="submit">🧠 Make a Quiz from This Homework →</button>
+        </form>
+        {% endif %}
+    </main>
+</body>
+</html>
