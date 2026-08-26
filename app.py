@@ -1,7 +1,6 @@
 # Production entrypoint for Render.
-# V7 extends the stable V5 app with focus mode, analytics, achievements,
-# worksheets, search, PDF export, and voice-tutor support.
-from app_v7 import app
+# V8 extends V7 with the interactive AI Face Tutor.
+from app_v8 import app
 
 
 if __name__ == "__main__":
