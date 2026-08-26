@@ -1,3 +1,4 @@
+import os
 from flask import render_template, request, jsonify
 from app_v7 import app
 from services.groq_ai import ai
@@ -5,7 +6,19 @@ from services.groq_ai import ai
 
 @app.route("/ai-face", methods=["GET"])
 def ai_face_tutor():
-    return render_template("ai_face.html")
+    return render_template(
+        "ai_face.html",
+        did_agent_id=os.getenv("DID_AGENT_ID", "").strip(),
+        did_client_key=os.getenv("DID_CLIENT_KEY", "").strip(),
+    )
+
+
+@app.route("/api/ai-face/config", methods=["GET"])
+def ai_face_config():
+    return jsonify({
+        "configured": bool(os.getenv("DID_AGENT_ID") and os.getenv("DID_CLIENT_KEY")),
+        "agent_id": os.getenv("DID_AGENT_ID", "").strip(),
+    })
 
 
 @app.route("/api/ai-face/teach", methods=["POST"])
@@ -50,7 +63,11 @@ def ai_face_lesson():
     topic = (data.get("topic") or "").strip()
     if not topic:
         return jsonify({"error": "Enter a topic first."}), 400
-    return ai_face_teach_proxy(grade, subject, f"Start a mini lesson on {topic}. Explain the idea simply, give one everyday example, then ask me one short question to check my understanding.")
+    return ai_face_teach_proxy(
+        grade,
+        subject,
+        f"Start a mini lesson on {topic}. Explain the idea simply, give one everyday example, then ask me one short question to check my understanding.",
+    )
 
 
 def ai_face_teach_proxy(grade, subject, prompt):
@@ -61,7 +78,10 @@ def ai_face_teach_proxy(grade, subject, prompt):
         response = client.chat.completions.create(
             model=ai.model,
             messages=[
-                {"role": "system", "content": f"You are a warm Grade {grade} {subject} teacher. This is a spoken mini-lesson. Use natural speech, short paragraphs, one simple example, and finish with one question for the student. No markdown."},
+                {
+                    "role": "system",
+                    "content": f"You are a warm Grade {grade} {subject} teacher. This is a spoken mini-lesson. Use natural speech, short paragraphs, one simple example, and finish with one question for the student. No markdown.",
+                },
                 {"role": "user", "content": prompt},
             ],
             temperature=0.5,
