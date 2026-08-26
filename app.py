@@ -1,7 +1,7 @@
 # Production entrypoint for Render.
-# V5 lives in app_v5.py; this compatibility entrypoint keeps
-# Render's existing `gunicorn app:app` command working.
-from app_v5 import app
+# V7 extends the stable V5 app with focus mode, analytics, achievements,
+# worksheets, search, PDF export, and voice-tutor support.
+from app_v7 import app
 
 
 if __name__ == "__main__":
