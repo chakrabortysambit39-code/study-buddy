@@ -25,39 +25,47 @@ body{background:radial-gradient(circle at 50% 0,#18213b 0,#070b14 45%);color:var
 <div class="lesson-plan"><div class="active">● 1. Introduction</div><div>2. Main concept</div><div>3. Example</div><div>4. Check understanding</div><div>5. Quick recap</div></div>
 <div class="listen-note">🎙️ <b>Always listening:</b> after you allow microphone access, just speak normally. You do not need to press a talk button.</div>
 </aside>
-<section class="panel video-panel"><div class="live-label"><span class="live-dot"></span><span id="liveText">CONNECTING</span></div><div class="video-wrap"><video id="agent-video" autoplay playsinline></video><div id="placeholder" class="placeholder"><div><div class="big">👨‍🏫</div><h2>Your real AI teacher will appear here</h2><p>The tutor will connect and request microphone access automatically.</p></div></div><div id="caption" class="caption">Hi! I'm your Study Buddy teacher. Once connected, just speak to me.</div></div><div class="video-controls"><button onclick="interruptTutor()">Ⅱ Interrupt / Pause</button><button class="stop" onclick="stopTutor()">■ Stop Listening</button></div></section>
+<section class="panel video-panel"><div class="live-label"><span class="live-dot"></span><span id="liveText">CONNECTING</span></div><div class="video-wrap"><video id="agent-video" autoplay playsinline></video><div id="placeholder" class="placeholder"><div><div class="big">👨‍🏫</div><h2>Your real AI teacher will appear here</h2><p id="connectionHint">Connecting to the live tutor…</p></div></div><div id="caption" class="caption">Hi! I'm your Study Buddy teacher. Once connected, just speak to me.</div></div><div class="video-controls"><button onclick="interruptTutor()">Ⅱ Interrupt / Pause</button><button class="stop" onclick="stopTutor()">■ Stop Listening</button></div></section>
 <aside class="panel chat"><h2>Conversation</h2><div id="messages" class="messages"><div class="msg ai">Hi! I'm your AI Teacher. Once the microphone is enabled, you can simply start talking.</div></div><div class="status" id="status">Connecting to your tutor…</div><div class="chat-input"><input id="question" placeholder="Type your question…" onkeydown="if(event.key==='Enter')sendQuestion()"><button onclick="sendQuestion()">➤</button></div></aside>
 </section>
 </main>
 <script type="module">
 import * as did from 'https://cdn.jsdelivr.net/npm/@d-id/client-sdk/+esm';
 const agentId={{ did_agent_id|tojson }}, clientKey={{ did_client_key|tojson }};
-const video=document.getElementById('agent-video'), placeholder=document.getElementById('placeholder'), caption=document.getElementById('caption'), statusEl=document.getElementById('status'), messages=document.getElementById('messages');
-let agent=null,micStream=null,connected=false,listening=false;
+const video=document.getElementById('agent-video'), placeholder=document.getElementById('placeholder'), caption=document.getElementById('caption'), statusEl=document.getElementById('status'), messages=document.getElementById('messages'), hint=document.getElementById('connectionHint');
+let agent=null,micStream=null,connected=false,listening=false,connecting=false;
 function addMessage(text,role='ai'){const el=document.createElement('div');el.className='msg '+role;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight}
 function setStatus(t){statusEl.textContent=t}
 function setCaption(t){caption.textContent=t}
-async function connectAgent(){
- if(!agentId||!clientKey){setStatus('Add the D-ID Agent ID and Client Key in Render.');return false}
- if(agent)return true;
+function setConnectionState(text){document.getElementById('liveText').textContent=text;hint.textContent=text==='AI TEACHER'?'Live teacher connected.':text}
+async function connectAgent(force=false){
+ if(!agentId||!clientKey){setStatus('Add the D-ID Agent ID and Client Key in Render.');setConnectionState('NOT CONFIGURED');return false}
+ if(agent&&!force)return connected;
+ if(connecting)return false;
+ connecting=true;
  try{
   const callbacks={
    onSrcObjectReady(v){video.srcObject=v;placeholder.classList.add('hidden');return v},
-   onConnectionStateChange(s){connected=s==='connected';document.getElementById('liveText').textContent=connected?'AI TEACHER':'CONNECTING';setStatus(connected?'Teacher online — microphone is being enabled…':'Connection: '+s)},
-   onVideoStateChange(s){if(s==='STOP')setStatus(listening?'Listening — just speak':'Teacher paused');else setStatus('Teacher is speaking…')},
-   onNewMessage(ms,type){if(!ms||!ms.length)return;const last=ms[ms.length-1];if(type==='user'&&last.role==='user'){addMessage(last.content,'user')}if(type==='answer'&&last.role==='assistant'){setCaption(last.content);addMessage(last.content,'ai')}},
-   onError(e){console.error(e);setStatus('Tutor error — check the D-ID Agent configuration.')}
+   onConnectionStateChange(s){console.log('D-ID connection:',s);connected=s==='connected';setConnectionState(connected?'AI TEACHER':'CONNECTING');setStatus(connected?'Teacher online — enabling microphone…':'Connection: '+s)},
+   onVideoStateChange(s){if(s==='STOP')setStatus(listening?'🎙️ Listening — just speak':'Teacher paused');else setStatus('Teacher is speaking…')},
+   onNewMessage(ms,type){if(!ms||!ms.length)return;const last=ms[ms.length-1];if(type==='user'&&last.role==='user')addMessage(last.content,'user');if(type==='answer'&&last.role==='assistant'){setCaption(last.content);addMessage(last.content,'ai')}},
+   onError(e,d){console.error('D-ID error',e,d);setStatus('Tutor connection error. Retrying…')}
   };
+  if(agent&&force){try{await agent.disconnect()}catch(e){}agent=null;connected=false}
+  setStatus('Connecting to realistic teacher…');setConnectionState('CONNECTING');
   agent=await did.createAgentManager(agentId,{auth:{type:'key',clientKey},callbacks});
-  await agent.connect();
+  const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('D-ID connection timeout')),20000));
+  await Promise.race([agent.connect(),timeout]);
+  if(!connected){await new Promise(r=>setTimeout(r,500));}
   await enableAlwaysListening();
-  return true;
- }catch(e){console.error(e);setStatus('Could not connect to the realistic tutor.');return false}
+  connecting=false;return true;
+ }catch(e){console.error(e);connecting=false;connected=false;setConnectionState('RETRYING');setStatus('Tutor is taking longer than expected. Retrying in 2 seconds…');
+  setTimeout(()=>connectAgent(true),2000);return false}
 }
 async function enableAlwaysListening(){
  if(!agent||!navigator.mediaDevices?.getUserMedia){setStatus('This browser cannot access a microphone.');return}
  try{
-  micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  if(!micStream)micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
   if(typeof agent.publishMicrophoneStream!=='function')throw new Error('This D-ID Agent does not support microphone input. Use an Expressive V4 Agent.');
   await agent.publishMicrophoneStream(micStream);
   listening=true;setStatus('🎙️ Listening — just speak naturally');
@@ -71,6 +79,6 @@ async function startLesson(){const topic=document.getElementById('topic').value.
 async function sendQuestion(){const input=document.getElementById('question'),text=input.value.trim();if(!text)return;input.value='';interruptTutor();addMessage(text,'user');try{const answer=await groqLesson(text);addMessage(answer,'ai');await speakWithFace(answer)}catch(e){setStatus(e.message)}}
 function newLesson(){document.getElementById('topic').value='';document.getElementById('question').value='';setCaption('Choose a topic and start a new lesson.');setStatus(listening?'🎙️ Listening — just speak':'Waiting for tutor…')}
 window.startLesson=startLesson;window.sendQuestion=sendQuestion;window.interruptTutor=interruptTutor;window.stopTutor=stopTutor;window.newLesson=newLesson;
-window.addEventListener('load',()=>{setTimeout(connectAgent,400)});
+window.addEventListener('load',()=>{setTimeout(connectAgent,200)});
 </script>
 </body></html>
