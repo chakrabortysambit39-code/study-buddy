@@ -55,8 +55,20 @@ def init_db():
             total INTEGER,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )""")
+        conn.execute("""CREATE TABLE IF NOT EXISTS study_tasks (
+            id BIGSERIAL PRIMARY KEY,
+            user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            task_date DATE NOT NULL,
+            subject TEXT NOT NULL,
+            topic TEXT NOT NULL,
+            minutes INTEGER NOT NULL DEFAULT 20,
+            action TEXT NOT NULL,
+            completed BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )""")
         conn.execute("CREATE INDEX IF NOT EXISTS notes_user_idx ON notes(user_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS activity_user_idx ON activity(user_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS study_tasks_user_date_idx ON study_tasks(user_id, task_date)")
 
 
 def find_user_by_email(email):
@@ -69,7 +81,5 @@ def create_user(name, email, password_hash):
         return conn.execute("INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s) RETURNING id, name, email", (name, email, password_hash)).fetchone()
 
 
-# Database initialization is attempted when DATABASE_URL is present.
-# The web app can still boot so Render can show a useful configuration message.
 if DATABASE_URL:
     init_db()
