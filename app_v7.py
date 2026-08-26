@@ -60,7 +60,8 @@ def generate_study_plan(grade, subjects, exam_date, daily_minutes, goal):
         return None, "I couldn't generate the study plan right now. Please try again."
 
 
-@app.route("/planner", methods=["GET", "POST"])
+# Use a unique endpoint because app_v5 already owns /planner.
+@app.route("/planner", methods=["GET", "POST"], endpoint="planner_v7")
 @login_required
 def planner():
     uid = v7_user(); error = None; plan = None
@@ -72,7 +73,7 @@ def planner():
                 with connection() as conn:
                     conn.execute("DELETE FROM study_tasks WHERE user_id=%s AND task_date >= %s", (uid, start))
                     for item in raw[:7]: conn.execute("INSERT INTO study_tasks (user_id,task_date,subject,topic,minutes,action) VALUES (%s,%s,%s,%s,%s,%s)", (uid, start + timedelta(days=int(item["day"])-1), item["subject"], item["topic"], max(1,int(item["minutes"])), item["action"]))
-                record(uid, "planner", 20); return redirect(url_for("planner"))
+                record(uid, "planner", 20); return redirect(url_for("planner_v7"))
             except Exception as exc:
                 print(f"Planner save error: {exc}"); error = "Could not save the plan. Please try again."
         elif not form["exam_date"]: error = "Choose an exam date."
@@ -92,7 +93,7 @@ def complete_planner_task(task_id):
         task = conn.execute("SELECT completed FROM study_tasks WHERE id=%s AND user_id=%s", (task_id, uid)).fetchone()
         if task and not task["completed"]:
             conn.execute("UPDATE study_tasks SET completed=TRUE WHERE id=%s AND user_id=%s", (task_id, uid)); record(uid, "planner_task", 15)
-    return redirect(url_for("planner"))
+    return redirect(url_for("planner_v7"))
 
 
 @app.route("/focus", methods=["GET", "POST"])
