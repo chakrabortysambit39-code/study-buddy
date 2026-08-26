@@ -1,6 +1,6 @@
 # Production entrypoint for Render.
-# V8 adds the AI Face Tutor on top of the stable V7 app.
-from app_v8 import app
+# V9 adds the Adaptive Learning Engine on top of the V8 AI Face Tutor.
+from app_v9 import app
 
 
 if __name__ == "__main__":
