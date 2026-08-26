@@ -1,63 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes • Study Buddy</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>AI Notes • Study Buddy</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
 <body>
-<main class="quiz-shell">
-    <a class="back-link" href="{{ url_for('home') }}">← Back to Study Buddy</a>
-    <section class="hero-card">
-        <p class="eyebrow">V3 • AI NOTES</p>
-        <h1>Study Notes 📚</h1>
-        <p>Generate notes with AI or write your own, then save them for revision.</p>
-    </section>
-
-    {% if error %}<section class="question-card error-card"><strong>⚠️ {{ error }}</strong></section>{% endif %}
-
-    <section class="question-card">
-        <h2>🤖 Generate notes with AI</h2>
-        <form method="POST" class="generator-grid">
-            <input type="hidden" name="action" value="generate">
-            <label>Grade<select name="grade">{% for grade in grades %}<option value="{{ grade }}" {% if form.grade == grade %}selected{% endif %}>Grade {{ grade }}</option>{% endfor %}</select></label>
-            <label>Subject<input name="subject" value="{{ form.subject }}" required></label>
-            <label>Topic<input name="topic" value="{{ form.topic }}" placeholder="e.g. Water Cycle" required></label>
-            <label>Detail<select name="detail"><option value="short" {% if form.detail == 'short' %}selected{% endif %}>Quick revision</option><option value="medium" {% if form.detail == 'medium' %}selected{% endif %}>Medium</option><option value="detailed" {% if form.detail == 'detailed' %}selected{% endif %}>Detailed</option></select></label>
-            <button class="primary-button" type="submit">✨ Generate Notes →</button>
-        </form>
-    </section>
-
-    {% if generated %}
-    <section class="question-card generated-note">
-        <div class="question-number">AI GENERATED • REVIEW BEFORE SAVING</div>
-        <h2>{{ form.title }}</h2>
-        <p class="answer-text">{{ form.content }}</p>
-    </section>
-    {% endif %}
-
-    <section class="question-card">
-        <h2>✍️ Save a note</h2>
-        <form method="POST" class="generator-grid">
-            <input type="hidden" name="action" value="save">
-            <label>Title<input name="title" value="{{ form.title }}" placeholder="e.g. Water Cycle" required></label>
-            <label>Subject<input name="subject" value="{{ form.subject }}" required></label>
-            <label style="grid-column:1/-1">Content<textarea name="content" rows="12" placeholder="Write or paste your notes here..." required>{{ form.content }}</textarea></label>
-            <button class="primary-button" type="submit">💾 Save Note →</button>
-        </form>
-    </section>
-
-    {% if notes %}
-    <section><h2>Saved Notes</h2>
-        {% for item in notes %}
-        <article class="question-card note-card">
-            <div><p class="eyebrow">{{ item.subject }}</p><h2>{{ item.title }}</h2><p class="answer-text">{{ item.content[:300] }}{% if item.content|length > 300 %}...{% endif %}</p></div>
-            <form method="POST" action="{{ url_for('delete_note_route', note_id=item.id) }}"><button class="secondary-button" type="submit">Delete</button></form>
-        </article>
-        {% endfor %}
-    </section>
-    {% endif %}
+<main class="quiz-shell notes-page">
+<a class="back-link" href="{{ url_for('home') }}">← Back to Study Buddy</a>
+<section class="hero-card notes-hero"><div class="notes-hero-icon">📚</div><div><p class="eyebrow">V7 • SMART REVISION NOTES</p><h1>Beautiful notes. Better revision.</h1><p>Generate polished, exam-ready notes with clear sections, key points, examples and quick revision cards.</p></div></section>
+{% if error %}<section class="question-card error-card"><strong>⚠️ {{ error }}</strong></section>{% endif %}
+<section class="question-card generator-card"><div class="section-heading"><div><p class="eyebrow">AI NOTE BUILDER</p><h2>✨ Generate a revision sheet</h2></div><span class="badge">Grade-aware</span></div>
+<form method="POST" class="generator-grid"><input type="hidden" name="action" value="generate"><label>Grade<select name="grade">{% for grade in grades %}<option value="{{ grade }}" {% if form.grade == grade %}selected{% endif %}>Grade {{ grade }}</option>{% endfor %}</select></label><label>Subject<input name="subject" value="{{ form.subject }}" required></label><label class="full-width">Topic<input name="topic" value="{{ form.topic }}" placeholder="e.g. The Water Cycle" required></label><label>Detail level<select name="detail"><option value="short" {% if form.detail == 'short' %}selected{% endif %}>⚡ Quick revision</option><option value="medium" {% if form.detail == 'medium' %}selected{% endif %}>📖 Standard</option><option value="detailed" {% if form.detail == 'detailed' %}selected{% endif %}>🔎 Detailed</option></select></label><button class="primary-button" type="submit">✨ Generate Beautiful Notes</button></form></section>
+{% if generated %}<section class="generated-notes-layout"><article class="question-card note-preview-card"><div class="note-preview-top"><span class="badge success-badge">AI GENERATED</span><span class="note-grade">Grade {{ form.grade }} • {{ form.subject }}</span></div><h2>{{ form.title }}</h2><div class="note-content" data-note-content>{{ form.content }}</div></article><article class="question-card note-editor-card"><div class="section-heading"><div><p class="eyebrow">MAKE IT YOURS</p><h2>✏️ Review & save</h2></div></div><form method="POST" class="note-save-form"><input type="hidden" name="action" value="save"><label>Title<input name="title" value="{{ form.title }}" required></label><label>Subject<input name="subject" value="{{ form.subject }}" required></label><label>Notes<textarea name="content" rows="18" required>{{ form.content }}</textarea></label><button class="primary-button" type="submit">💾 Save to My Notes</button></form></article></section>{% endif %}
+<section class="saved-notes-section"><div class="section-heading"><div><p class="eyebrow">YOUR LIBRARY</p><h2>📚 Saved Notes</h2></div><a class="secondary-button" href="{{ url_for('search') }}">🔎 Search</a></div>
+{% if notes %}<div class="saved-notes-grid">{% for item in notes %}<article class="saved-note-card"><div class="saved-note-icon">📘</div><p class="eyebrow">{{ item.subject }}</p><h3>{{ item.title }}</h3><div class="saved-note-preview note-content" data-note-content>{{ item.content }}</div><div class="saved-note-actions"><a class="secondary-button" href="{{ url_for('export_note', note_id=item.id) }}">📄 PDF</a><form method="POST" action="{{ url_for('delete_note_route', note_id=item.id) }}"><button class="danger-button" type="submit">Delete</button></form></div></article>{% endfor %}</div>{% else %}<div class="empty-notes"><div>📝</div><h3>Your revision library is empty</h3><p>Generate your first set of notes above and build your personal study library.</p></div>{% endif %}</section>
 </main>
-</body>
-</html>
+<script>
+function formatNotes(root){const raw=root.textContent.trim();if(!raw)return;const lines=raw.split(/\r?\n/),out=[];let list=[];const flush=()=>{if(list.length){out.push('<ul class="note-bullets">'+list.map(x=>'<li>'+x+'</li>').join('')+'</ul>');list=[];}};for(const line of lines){const t=line.trim();if(!t){flush();continue;}if(t.startsWith('## ')){flush();out.push('<div class="note-section"><h3>'+t.slice(3)+'</h3></div>');continue;}if(t.startsWith('### ')){flush();out.push('<h4>'+t.slice(4)+'</h4>');continue;}if(t.startsWith('- ')){list.push(t.slice(2));continue;}const n=t.match(/^(\d+)\.\s+(.*)$/);if(n){flush();out.push('<div class="note-step"><span>'+n[1]+'</span><p>'+n[2]+'</p></div>');continue;}flush();out.push('<p>'+t+'</p>');}flush();root.innerHTML=out.join('');}
+document.querySelectorAll('[data-note-content]').forEach(formatNotes);
+</script>
+</body></html>
