@@ -22,12 +22,7 @@ class GroqAI:
         if not client:
             return "Groq AI is not configured yet. Add GROQ_API_KEY in Render Environment Variables."
         try:
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-                temperature=0.4,
-                max_completion_tokens=700,
-            )
+            response = client.chat.completions.create(model=self.model, messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}], temperature=0.4, max_completion_tokens=700)
             return response.choices[0].message.content.strip()
         except Exception as exc:
             print(f"Groq API error: {exc}")
@@ -37,29 +32,40 @@ class GroqAI:
         client = self._get_client()
         if not client:
             return None, "Groq AI is not configured yet."
-        schema = {
-            "type": "object",
-            "properties": {"title": {"type": "string"}, "content": {"type": "string"}},
-            "required": ["title", "content"],
-            "additionalProperties": False,
-        }
-        prompt = f"""Create clear school study notes for Grade {grade}.
+        schema = {"type": "object", "properties": {"title": {"type": "string"}, "content": {"type": "string"}}, "required": ["title", "content"], "additionalProperties": False}
+        prompt = f"""Create beautiful, exam-ready school study notes for Grade {grade}.
 Subject: {subject}
 Topic: {topic}
 Detail level: {detail}
 
-Use simple, age-appropriate language. Include a short overview, key concepts, important facts, examples where useful, and a quick revision section. Use readable headings and bullet points. Do not invent facts. Return only the note title and note content."""
+Return the content in this exact Markdown-like structure:
+## 🧠 Quick Overview
+2-4 clear sentences.
+
+## 🔑 Key Concepts
+- 4-8 concise points
+
+## 📌 Important Facts
+- Important facts, definitions, formulas or dates when relevant
+
+## 🔍 How It Works / Main Explanation
+Use short paragraphs and numbered steps where useful.
+
+## 💡 Example
+Give one simple, grade-appropriate example when useful.
+
+## ⚠️ Common Mistakes
+- 2-4 mistakes or misconceptions when relevant
+
+## 📝 Quick Revision
+- 5-8 ultra-short revision bullets
+
+## 🎯 Remember
+One memorable takeaway.
+
+Use simple, age-appropriate language, strong organization, short sections, bullets and numbered steps. Do not invent facts. If a section is not relevant, omit that section rather than filling it with nonsense."""
         try:
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are Study Buddy's expert school-notes generator."},
-                    {"role": "user", "content": prompt},
-                ],
-                response_format={"type": "json_schema", "json_schema": {"name": "study_notes", "strict": True, "schema": schema}},
-                temperature=0.4,
-                max_completion_tokens=2500,
-            )
+            response = client.chat.completions.create(model=self.model, messages=[{"role": "system", "content": "You are Study Buddy's expert school-notes designer. Your notes should look like polished revision sheets, not a wall of text."}, {"role": "user", "content": prompt}], response_format={"type": "json_schema", "json_schema": {"name": "study_notes", "strict": True, "schema": schema}}, temperature=0.35, max_completion_tokens=3000)
             data = json.loads(response.choices[0].message.content or "{}")
             if not data.get("title") or not data.get("content"):
                 return None, "The AI returned an empty note. Please try again."
