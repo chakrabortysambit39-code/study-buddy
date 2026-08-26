@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Planner • Study Buddy</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .planner-card{background:#fff;border:1px solid #e7e7f2;border-radius:24px;padding:28px;margin:24px 0;box-shadow:0 12px 35px rgba(40,35,90,.06)}
+    .planner-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.planner-grid label{font-weight:700;display:block;margin-bottom:7px}.planner-grid input,.planner-grid textarea{width:100%;box-sizing:border-box;padding:13px 15px;border:1px solid #dddff0;border-radius:13px;font:inherit}.planner-grid textarea{min-height:90px;resize:vertical}.full{grid-column:1/-1}
+    .task{display:flex;gap:15px;align-items:flex-start;padding:17px;border:1px solid #ececf5;border-radius:16px;margin:10px 0}.task.done{opacity:.55}.task h3{margin:0 0 4px}.task p{margin:3px 0;color:#666}.task-date{font-weight:800;min-width:74px}.task button{margin-left:auto}.pill{display:inline-block;padding:5px 10px;border-radius:999px;background:#f0efff;font-size:12px;font-weight:800}
+    @media(max-width:700px){.planner-grid{grid-template-columns:1fr}.full{grid-column:auto}}
+  </style>
+</head>
+<body>
+<main class="page-shell">
+  <section class="hero">
+    <div class="brand">🧠 Study Buddy</div>
+    <p class="eyebrow">V6 • SMART STUDY PLANNER</p>
+    <h1>Plan less.<br><span>Study smarter.</span></h1>
+    <p class="subtitle">Tell Study Buddy your exam goal and it builds a realistic 7-day plan for you.</p>
+    <a class="secondary-button" href="{{ url_for('home') }}">← Back to Study Buddy</a>
+  </section>
+
+  <section class="planner-card">
+    <h2>🤖 Build my study plan</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="generate">
+      <div class="planner-grid">
+        <div><label>Grade</label><select name="grade">{% for g in grades %}<option value="{{ g }}" {% if form.grade == g %}selected{% endif %}>Grade {{ g }}</option>{% endfor %}</select></div>
+        <div><label>Exam date</label><input type="date" name="exam_date" value="{{ form.exam_date }}" required></div>
+        <div class="full"><label>Subjects</label><input name="subjects" value="{{ form.subjects }}" placeholder="Science, Maths, English"></div>
+        <div><label>Daily study time (minutes)</label><input type="number" min="15" max="240" name="daily_minutes" value="{{ form.daily_minutes }}"></div>
+        <div><label>Goal</label><input name="goal" value="{{ form.goal }}"></div>
+      </div>
+      <button class="primary-button" type="submit">✨ Generate 7-Day Plan</button>
+    </form>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  </section>
+
+  {% if generated %}
+  <section class="planner-card">
+    <h2>{{ generated.title }}</h2>
+    <p class="subtitle">Review the plan before saving it to your account.</p>
+    {% for task in generated.tasks %}
+      <div class="task"><div class="task-date">Day {{ task.day }}</div><div><span class="pill">{{ task.minutes }} min</span><h3>{{ task.subject }} — {{ task.topic }}</h3><p>{{ task.action }}</p></div></div>
+    {% endfor %}
+    <form method="post">
+      <input type="hidden" name="action" value="save">
+      <input type="hidden" name="plan_title" value="{{ generated.title }}">
+      <input type="hidden" name="exam_date" value="{{ form.exam_date }}">
+      <input type="hidden" name="tasks_json" value='{{ generated.tasks | tojson }}'>
+      <button class="primary-button" type="submit">💾 Save My Plan</button>
+    </form>
+  </section>
+  {% endif %}
+
+  <section class="planner-card">
+    <h2>📅 My current plan</h2>
+    {% if tasks %}
+      {% for task in tasks %}
+      <div class="task {% if task.completed %}done{% endif %}">
+        <div class="task-date">{{ task.task_date.strftime('%a') }}<br>{{ task.task_date.strftime('%d %b') }}</div>
+        <div><span class="pill">{{ task.minutes }} min</span><h3>{{ task.subject }} — {{ task.topic }}</h3><p>{{ task.action }}</p></div>
+        {% if not task.completed %}<form method="post" action="{{ url_for('complete_planner_task', task_id=task.id) }}"><button class="secondary-button" type="submit">✓ Done</button></form>{% else %}<strong>✓ Completed</strong>{% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="subtitle">No study plan yet. Generate one above and let's get moving. 🚀</p>
+    {% endif %}
+  </section>
+</main>
+</body>
+</html>
