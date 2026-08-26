@@ -1,5 +1,5 @@
 # Production entrypoint for Render.
-# V8 extends V7 with the interactive AI Face Tutor.
+# V8 adds the AI Face Tutor on top of the stable V7 app.
 from app_v8 import app
 
 
