@@ -8,99 +8,69 @@
 :root{--bg:#070b14;--panel:#0e1421;--panel2:#121a2a;--line:#263149;--text:#f4f7ff;--muted:#9ca8bd;--purple:#7c3cff;--blue:#315efb;--danger:#ef4444}
 body{background:radial-gradient(circle at 50% 0,#18213b 0,#070b14 45%);color:var(--text);min-height:100vh}.face-shell{max-width:1500px;margin:0 auto;padding:18px}.topbar{display:flex;justify-content:space-between;align-items:center;padding:8px 4px 18px}.brandline{display:flex;gap:12px;align-items:center;font-weight:800;font-size:20px}.brandmark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#8b5cf6,#315efb);display:grid;place-items:center}.top-actions{display:flex;gap:10px}.top-actions button,.top-actions a{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 14px;text-decoration:none;cursor:pointer}
 .tutor-grid{display:grid;grid-template-columns:250px minmax(0,1fr) 310px;gap:14px}.panel{background:rgba(14,20,33,.94);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 60px rgba(0,0,0,.28)}.side{padding:18px}.side h2{font-size:18px;margin:0 0 8px}.side p{color:var(--muted);font-size:13px;line-height:1.55}.field{margin:16px 0}.field label{display:block;color:#aeb8ca;font-size:12px;margin-bottom:7px}.field select,.field input{width:100%;box-sizing:border-box;background:#182133;border:1px solid #2b3850;color:#fff;border-radius:10px;padding:11px}.primary{width:100%;border:0;border-radius:11px;padding:12px;background:linear-gradient(135deg,#7c3cff,#315efb);color:#fff;font-weight:800;cursor:pointer}.lesson-plan{margin-top:18px;background:#141d2d;border:1px solid var(--line);border-radius:12px;padding:12px}.lesson-plan div{padding:7px 4px;color:#c8d0df;font-size:13px}.lesson-plan .active{background:#263148;border-radius:8px;color:#fff}
-.video-panel{overflow:hidden;position:relative;background:#000}.live-label{position:absolute;z-index:3;left:14px;top:14px;background:rgba(0,0,0,.65);padding:7px 10px;border-radius:9px;font-size:12px;font-weight:800}.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px}.video-wrap{aspect-ratio:16/10;background:linear-gradient(145deg,#111827,#05070c);position:relative;display:grid;place-items:center}.video-wrap video{width:100%;height:100%;object-fit:cover;display:block;background:#0a0d14}.placeholder{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:35px;color:#aab4c6}.placeholder .big{font-size:58px}.caption{position:absolute;z-index:4;left:6%;right:6%;bottom:92px;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);padding:14px 20px;border-radius:12px;text-align:center;font-size:17px;line-height:1.45}.video-controls{position:absolute;z-index:5;bottom:16px;left:3%;right:3%;display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:12px}.video-controls button{padding:14px;border-radius:12px;border:1px solid #38445c;background:#121927;color:#fff;font-weight:800;cursor:pointer}.video-controls .talk{background:linear-gradient(135deg,#8b3dff,#315efb);border:0}.video-controls .stop{border-color:#8c3131;color:#ffb4b4}
-.chat{padding:16px;display:flex;flex-direction:column;min-height:650px}.chat h2{margin:0 0 12px;font-size:18px}.messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;min-height:420px}.msg{max-width:90%;padding:10px 12px;border-radius:12px;line-height:1.45;font-size:14px}.msg.ai{background:#1b2435;align-self:flex-start}.msg.user{background:linear-gradient(135deg,#315efb,#6d3cff);align-self:flex-end}.chat-input{display:flex;gap:8px;margin-top:12px}.chat-input input{flex:1;background:#121a29;border:1px solid #33405a;color:#fff;border-radius:10px;padding:11px}.chat-input button{width:45px;border:0;border-radius:10px;background:#7c3cff;color:#fff;cursor:pointer}.status{font-size:12px;color:#92a0b6;margin-top:10px}.config-warning{background:#241b0b;border:1px solid #6a4b17;color:#ffd98a;padding:12px;border-radius:12px;font-size:13px;line-height:1.45;margin-bottom:14px}.hidden{display:none!important}
-@media(max-width:1100px){.tutor-grid{grid-template-columns:210px 1fr}.chat{grid-column:1/-1;min-height:360px}.messages{min-height:180px}}@media(max-width:760px){.tutor-grid{grid-template-columns:1fr}.side,.chat{grid-column:auto}.video-controls{grid-template-columns:1fr}.caption{bottom:190px}.top-actions{display:none}}
+.video-panel{overflow:hidden;position:relative;background:#000}.live-label{position:absolute;z-index:3;left:14px;top:14px;background:rgba(0,0,0,.65);padding:7px 10px;border-radius:9px;font-size:12px;font-weight:800}.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px}.video-wrap{aspect-ratio:16/10;background:linear-gradient(145deg,#111827,#05070c);position:relative;display:grid;place-items:center}.video-wrap video{width:100%;height:100%;object-fit:cover;display:block;background:#0a0d14}.placeholder{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:35px;color:#aab4c6}.placeholder .big{font-size:58px}.caption{position:absolute;z-index:4;left:6%;right:6%;bottom:82px;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);padding:14px 20px;border-radius:12px;text-align:center;font-size:17px;line-height:1.45}.video-controls{position:absolute;z-index:5;bottom:16px;left:3%;right:3%;display:grid;grid-template-columns:1fr 1fr;gap:12px}.video-controls button{padding:14px;border-radius:12px;border:1px solid #38445c;background:#121927;color:#fff;font-weight:800;cursor:pointer}.video-controls .stop{border-color:#8c3131;color:#ffb4b4}.mic-live{background:linear-gradient(135deg,#16a34a,#0f766e)!important;border:0!important}.mic-live.listening{animation:pulse 1.4s infinite}@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(34,197,94,.12)}}
+.chat{padding:16px;display:flex;flex-direction:column;min-height:650px}.chat h2{margin:0 0 12px;font-size:18px}.messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;min-height:420px}.msg{max-width:90%;padding:10px 12px;border-radius:12px;line-height:1.45;font-size:14px}.msg.ai{background:#1b2435;align-self:flex-start}.msg.user{background:linear-gradient(135deg,#315efb,#6d3cff);align-self:flex-end}.chat-input{display:flex;gap:8px;margin-top:12px}.chat-input input{flex:1;background:#121a29;border:1px solid #33405a;color:#fff;border-radius:10px;padding:11px}.chat-input button{width:45px;border:0;border-radius:10px;background:#7c3cff;color:#fff;cursor:pointer}.status{font-size:12px;color:#92a0b6;margin-top:10px}.config-warning{background:#241b0b;border:1px solid #6a4b17;color:#ffd98a;padding:12px;border-radius:12px;font-size:13px;line-height:1.45;margin-bottom:14px}.hidden{display:none!important}.listen-note{font-size:12px;color:#8fa0ba;margin-top:10px;line-height:1.45}
+@media(max-width:1100px){.tutor-grid{grid-template-columns:210px 1fr}.chat{grid-column:1/-1;min-height:360px}.messages{min-height:180px}}@media(max-width:760px){.tutor-grid{grid-template-columns:1fr}.video-controls{grid-template-columns:1fr}.caption{bottom:150px}.top-actions{display:none}}
 </style></head>
 <body>
 <main class="face-shell">
 <header class="topbar"><div class="brandline"><div class="brandmark">◈</div><div>Study Buddy<div style="font-size:12px;color:#8e9bb0;font-weight:500">AI Face Tutor</div></div></div><div class="top-actions"><a href="{{ url_for('home') }}">← Home</a><button onclick="newLesson()">＋ New Lesson</button></div></header>
-<div id="configWarning" class="config-warning {% if did_agent_id and did_client_key %}hidden{% endif %}">Realistic live tutor is not connected yet. Add <b>DID_AGENT_ID</b> and <b>DID_CLIENT_KEY</b> in Render after creating your D-ID Agent, then redeploy.</div>
+<div id="configWarning" class="config-warning {% if did_agent_id and did_client_key %}hidden{% endif %}">Realistic live tutor is not connected yet. Add <b>DID_AGENT_ID</b> and <b>DID_CLIENT_KEY</b> in Render after creating a D-ID Expressive (V4) Agent, then redeploy.</div>
 <section class="tutor-grid">
-<aside class="panel side"><h2>AI Face Tutor <span style="font-size:10px;background:#7c3cff;padding:3px 6px;border-radius:5px">REAL</span></h2><p>Your photorealistic AI teacher. It can speak, listen, explain, and be interrupted.</p>
+<aside class="panel side"><h2>AI Face Tutor <span style="font-size:10px;background:#7c3cff;padding:3px 6px;border-radius:5px">REAL</span></h2><p>Your photorealistic AI teacher. It listens automatically, speaks naturally, and can be interrupted while teaching.</p>
 <div class="field"><label>Grade</label><select id="grade">{% for g in range(1,13) %}<option value="{{g}}" {% if g==7 %}selected{% endif %}>Grade {{g}}</option>{% endfor %}</select></div>
 <div class="field"><label>Subject</label><select id="subject"><option>Science</option><option>Maths</option><option>English</option><option>French</option><option>Social Science</option><option>Computer</option></select></div>
 <div class="field"><label>Topic</label><input id="topic" placeholder="Water Cycle"></div>
 <button class="primary" onclick="startLesson()">🎬 Start Teaching</button>
 <div class="lesson-plan"><div class="active">● 1. Introduction</div><div>2. Main concept</div><div>3. Example</div><div>4. Check understanding</div><div>5. Quick recap</div></div>
+<div class="listen-note">🎙️ <b>Always listening:</b> after you allow microphone access, just speak normally. You do not need to press a talk button.</div>
 </aside>
-<section class="panel video-panel"><div class="live-label"><span class="live-dot"></span><span id="liveText">LIVE</span></div><div class="video-wrap"><video id="agent-video" autoplay playsinline></video><div id="placeholder" class="placeholder"><div><div class="big">👨‍🏫</div><h2>Your real AI teacher will appear here</h2><p>Start a lesson after connecting your D-ID Agent.</p></div></div><div id="caption" class="caption">Hi! I'm your Study Buddy teacher. Choose a topic and let's learn.</div></div><div class="video-controls"><button onclick="interruptTutor()">Ⅱ Pause</button><button class="talk" onclick="talkToTeacher()">🎤 Talk to Teacher<br><small style="font-weight:500">Click to interrupt and ask</small></button><button class="stop" onclick="stopTutor()">■ Stop</button></div></section>
-<aside class="panel chat"><h2>Conversation</h2><div id="messages" class="messages"><div class="msg ai">Hi! I'm your AI Teacher. What would you like to learn today?</div></div><div class="status" id="status">Waiting for tutor connection…</div><div class="chat-input"><input id="question" placeholder="Type your question…" onkeydown="if(event.key==='Enter')sendQuestion()"><button onclick="sendQuestion()">➤</button></div></aside>
+<section class="panel video-panel"><div class="live-label"><span class="live-dot"></span><span id="liveText">CONNECTING</span></div><div class="video-wrap"><video id="agent-video" autoplay playsinline></video><div id="placeholder" class="placeholder"><div><div class="big">👨‍🏫</div><h2>Your real AI teacher will appear here</h2><p>The tutor will connect and request microphone access automatically.</p></div></div><div id="caption" class="caption">Hi! I'm your Study Buddy teacher. Once connected, just speak to me.</div></div><div class="video-controls"><button onclick="interruptTutor()">Ⅱ Interrupt / Pause</button><button class="stop" onclick="stopTutor()">■ Stop Listening</button></div></section>
+<aside class="panel chat"><h2>Conversation</h2><div id="messages" class="messages"><div class="msg ai">Hi! I'm your AI Teacher. Once the microphone is enabled, you can simply start talking.</div></div><div class="status" id="status">Connecting to your tutor…</div><div class="chat-input"><input id="question" placeholder="Type your question…" onkeydown="if(event.key==='Enter')sendQuestion()"><button onclick="sendQuestion()">➤</button></div></aside>
 </section>
 </main>
 <script type="module">
 import * as did from 'https://cdn.jsdelivr.net/npm/@d-id/client-sdk/+esm';
-
-const agentId = {{ did_agent_id|tojson }};
-const clientKey = {{ did_client_key|tojson }};
-const video = document.getElementById('agent-video');
-const placeholder = document.getElementById('placeholder');
-const caption = document.getElementById('caption');
-const statusEl = document.getElementById('status');
-const messages = document.getElementById('messages');
-let agent = null;
-let recognition = null;
-let connected = false;
-
-function addMessage(text, role='ai') { const el=document.createElement('div'); el.className='msg '+role; el.textContent=text; messages.appendChild(el); messages.scrollTop=messages.scrollHeight; }
-function setStatus(text){statusEl.textContent=text;}
-function setCaption(text){caption.textContent=text;}
-function interruptTutor(){ if(agent && typeof agent.interrupt==='function'){ try{agent.interrupt(true);}catch(e){} } setStatus('Paused — ready for you'); }
-function stopTutor(){ interruptTutor(); if(recognition){try{recognition.stop()}catch(e){}} setStatus('Stopped'); }
-window.interruptTutor=interruptTutor; window.stopTutor=stopTutor;
-
+const agentId={{ did_agent_id|tojson }}, clientKey={{ did_client_key|tojson }};
+const video=document.getElementById('agent-video'), placeholder=document.getElementById('placeholder'), caption=document.getElementById('caption'), statusEl=document.getElementById('status'), messages=document.getElementById('messages');
+let agent=null,micStream=null,connected=false,listening=false;
+function addMessage(text,role='ai'){const el=document.createElement('div');el.className='msg '+role;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight}
+function setStatus(t){statusEl.textContent=t}
+function setCaption(t){caption.textContent=t}
 async function connectAgent(){
-  if(!agentId || !clientKey){ setStatus('D-ID Agent is not configured yet.'); return false; }
-  if(agent) return true;
-  try{
-    const callbacks={
-      onSrcObjectReady(value){ video.srcObject=value; placeholder.classList.add('hidden'); return value; },
-      onConnectionStateChange(state){ connected=state==='connected'; setStatus(connected?'Teacher is online':'Connection: '+state); document.getElementById('liveText').textContent=connected?'AI Teacher':'CONNECTING'; },
-      onVideoStateChange(state){ if(state==='STOP') setStatus('Ready for your next question'); else setStatus('Teacher is speaking…'); },
-      onNewMessage(msgs,type){ if(type==='answer'){ const last=msgs[msgs.length-1]; if(last && last.role==='assistant'){ setCaption(last.content); } } },
-      onError(error){ console.error(error); setStatus('Tutor connection error. Check your D-ID Agent settings.'); }
-    };
-    agent=await did.createAgentManager(agentId,{auth:{type:'key',clientKey},callbacks,streamOptions:{compatibilityMode:'auto',streamWarmup:true}});
-    await agent.connect();
-    return true;
-  }catch(e){ console.error(e); setStatus('Could not connect to the realistic tutor.'); return false; }
+ if(!agentId||!clientKey){setStatus('Add the D-ID Agent ID and Client Key in Render.');return false}
+ if(agent)return true;
+ try{
+  const callbacks={
+   onSrcObjectReady(v){video.srcObject=v;placeholder.classList.add('hidden');return v},
+   onConnectionStateChange(s){connected=s==='connected';document.getElementById('liveText').textContent=connected?'AI TEACHER':'CONNECTING';setStatus(connected?'Teacher online — microphone is being enabled…':'Connection: '+s)},
+   onVideoStateChange(s){if(s==='STOP')setStatus(listening?'Listening — just speak':'Teacher paused');else setStatus('Teacher is speaking…')},
+   onNewMessage(ms,type){if(!ms||!ms.length)return;const last=ms[ms.length-1];if(type==='user'&&last.role==='user'){addMessage(last.content,'user')}if(type==='answer'&&last.role==='assistant'){setCaption(last.content);addMessage(last.content,'ai')}},
+   onError(e){console.error(e);setStatus('Tutor error — check the D-ID Agent configuration.')}
+  };
+  agent=await did.createAgentManager(agentId,{auth:{type:'key',clientKey},callbacks});
+  await agent.connect();
+  await enableAlwaysListening();
+  return true;
+ }catch(e){console.error(e);setStatus('Could not connect to the realistic tutor.');return false}
 }
-
-async function speakWithFace(text){
-  const ok=await connectAgent(); if(!ok)return;
-  interruptTutor(); setCaption(text); setStatus('Teacher is speaking…');
-  try{ await agent.speak({type:'text',input:text,sentiment:'friendly'}); }catch(e){ console.error(e); setStatus('Could not start the tutor voice.'); }
+async function enableAlwaysListening(){
+ if(!agent||!navigator.mediaDevices?.getUserMedia){setStatus('This browser cannot access a microphone.');return}
+ try{
+  micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  if(typeof agent.publishMicrophoneStream!=='function')throw new Error('This D-ID Agent does not support microphone input. Use an Expressive V4 Agent.');
+  await agent.publishMicrophoneStream(micStream);
+  listening=true;setStatus('🎙️ Listening — just speak naturally');
+ }catch(e){console.error(e);setStatus('Microphone permission is needed for automatic listening.')}
 }
-
-async function groqLesson(prompt){
-  const grade=document.getElementById('grade').value, subject=document.getElementById('subject').value, topic=document.getElementById('topic').value.trim();
-  const r=await fetch('/api/ai-face/teach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({grade,subject,topic,prompt})});
-  const d=await r.json(); if(!r.ok)throw new Error(d.error||'AI lesson failed'); return d.answer;
-}
-async function startLesson(){
-  const topic=document.getElementById('topic').value.trim(); if(!topic){alert('Enter a topic first.');return;}
-  try{ setStatus('Preparing lesson…'); const text=await groqLesson(`Start a Grade ${document.getElementById('grade').value} ${document.getElementById('subject').value} mini lesson on ${topic}. Explain the core idea simply, give one everyday example, and finish with one short question for the student.`); addMessage(text,'ai'); await speakWithFace(text); }catch(e){setStatus(e.message)}
-}
-async function sendQuestion(){
-  const input=document.getElementById('question'), text=input.value.trim(); if(!text)return; input.value=''; interruptTutor(); addMessage(text,'user');
-  try{ const answer=await groqLesson(text); addMessage(answer,'ai'); await speakWithFace(answer); }catch(e){setStatus(e.message)}
-}
-async function askSpeech(text){ addMessage(text,'user'); try{ const answer=await groqLesson(text); addMessage(answer,'ai'); await speakWithFace(answer); }catch(e){setStatus(e.message)} }
-function talkToTeacher(){
-  interruptTutor();
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){setStatus('Voice input is not supported in this browser. Use Chrome or type below.');return;}
-  if(recognition){try{recognition.stop()}catch(e){}}
-  recognition=new SR(); recognition.lang='en-IN'; recognition.interimResults=true; recognition.continuous=false;
-  recognition.onstart=()=>setStatus('Listening… speak now');
-  recognition.onresult=(event)=>{let finalText='';for(let i=event.resultIndex;i<event.results.length;i++){if(event.results[i].isFinal)finalText+=event.results[i][0].transcript;} if(finalText.trim())askSpeech(finalText.trim());};
-  recognition.onerror=(event)=>setStatus('Microphone: '+event.error);
-  recognition.onend=()=>{if(statusEl.textContent==='Listening… speak now')setStatus('Ready');};
-  try{recognition.start()}catch(e){setStatus('Could not start microphone.');}
-}
-function newLesson(){document.getElementById('topic').value='';document.getElementById('question').value='';setCaption('Choose a topic and start a new lesson.');setStatus(connected?'Teacher is online':'Waiting for tutor connection…');}
-window.startLesson=startLesson; window.sendQuestion=sendQuestion; window.talkToTeacher=talkToTeacher; window.newLesson=newLesson;
-
-if(agentId && clientKey){ setStatus('Realistic tutor ready — click Start Teaching.'); } else { setStatus('Add D-ID Agent credentials in Render to enable the real face.'); }
+function interruptTutor(){try{if(agent?.interrupt)agent.interrupt(true)}catch(e){}setStatus(listening?'🎙️ Listening — just speak':'Paused')}
+async function stopTutor(){try{if(agent?.unpublishMicrophoneStream)await agent.unpublishMicrophoneStream()}catch(e){}if(micStream)micStream.getTracks().forEach(t=>t.stop());micStream=null;listening=false;try{if(agent?.interrupt)agent.interrupt(true)}catch(e){}setStatus('Microphone stopped')}
+async function speakWithFace(text){if(!await connectAgent())return;try{if(agent?.interrupt)agent.interrupt(true);setCaption(text);await agent.speak({type:'text',input:text,sentiment:'friendly'})}catch(e){console.error(e);setStatus('Could not speak through the tutor.')}}
+async function groqLesson(prompt){const grade=document.getElementById('grade').value,subject=document.getElementById('subject').value,topic=document.getElementById('topic').value.trim();const r=await fetch('/api/ai-face/teach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({grade,subject,topic,prompt})});const d=await r.json();if(!r.ok)throw new Error(d.error||'AI lesson failed');return d.answer}
+async function startLesson(){const topic=document.getElementById('topic').value.trim();if(!topic){alert('Enter a topic first.');return}try{setStatus('Preparing lesson…');const text=await groqLesson(`Start a Grade ${document.getElementById('grade').value} ${document.getElementById('subject').value} mini lesson on ${topic}. Explain the core idea simply, give one everyday example, and finish with one short question for the student.`);addMessage(text,'ai');await speakWithFace(text)}catch(e){setStatus(e.message)}}
+async function sendQuestion(){const input=document.getElementById('question'),text=input.value.trim();if(!text)return;input.value='';interruptTutor();addMessage(text,'user');try{const answer=await groqLesson(text);addMessage(answer,'ai');await speakWithFace(answer)}catch(e){setStatus(e.message)}}
+function newLesson(){document.getElementById('topic').value='';document.getElementById('question').value='';setCaption('Choose a topic and start a new lesson.');setStatus(listening?'🎙️ Listening — just speak':'Waiting for tutor…')}
+window.startLesson=startLesson;window.sendQuestion=sendQuestion;window.interruptTutor=interruptTutor;window.stopTutor=stopTutor;window.newLesson=newLesson;
+window.addEventListener('load',()=>{setTimeout(connectAgent,400)});
 </script>
 </body></html>
