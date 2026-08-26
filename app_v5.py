@@ -10,7 +10,8 @@ from services.quiz_generator import quiz_generator
 from services.homework_scanner import homework_scanner
 from services.notes import list_notes, create_note, delete_note
 from services.progress import record, stats
-from services.database import connection, init_db, DatabaseNotConfigured
+from services.database import init_db, DatabaseNotConfigured
+from services.planner import generate_plan, save_plan, list_tasks, complete_task
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-only-change-this-in-render")
@@ -109,7 +110,7 @@ def logout():
 def dashboard():
     uid = current_user_id()
     user_stats = stats(uid)
-    return render_template("dashboard.html", stats=user_stats, notes_count=len(list_notes(uid)))
+    return render_template("dashboard.html", stats=user_stats, notes_count=len(list_notes(uid)), planner_tasks=list_tasks(uid))
 
 
 @app.route("/quiz/<subject>")
@@ -242,6 +243,51 @@ def notes():
 def delete_note_route(note_id):
     delete_note(current_user_id(), note_id)
     return redirect(url_for("notes"))
+
+
+@app.route("/planner", methods=["GET", "POST"])
+@login_required
+def planner():
+    uid = current_user_id()
+    error = None
+    generated = None
+    form = {
+        "grade": request.form.get("grade", "7"),
+        "subjects": request.form.get("subjects", "Science, Maths"),
+        "exam_date": request.form.get("exam_date", ""),
+        "daily_minutes": request.form.get("daily_minutes", "60"),
+        "goal": request.form.get("goal", "Prepare for my exam"),
+    }
+    if request.method == "POST" and request.form.get("action") == "generate":
+        subjects = [s.strip() for s in form["subjects"].split(",") if s.strip()]
+        if not subjects or not form["exam_date"]:
+            error = "Enter at least one subject and an exam date."
+        else:
+            try:
+                minutes = max(15, min(240, int(form["daily_minutes"])))
+            except ValueError:
+                minutes = 60
+            generated, error = generate_plan(form["grade"], subjects, form["exam_date"], minutes, form["goal"], 7)
+    elif request.method == "POST" and request.form.get("action") == "save":
+        tasks_json = request.form.get("tasks_json", "")
+        import json
+        try:
+            tasks = json.loads(tasks_json)
+            save_plan(uid, request.form.get("plan_title", "My Study Plan"), request.form.get("exam_date", ""), tasks)
+            record(uid, "planner", 15)
+            return redirect(url_for("planner"))
+        except Exception as exc:
+            print(f"Planner save error: {exc}")
+            error = "I couldn't save the study plan. Please try again."
+    return render_template("planner.html", form=form, generated=generated, error=error, tasks=list_tasks(uid), grades=grade_options())
+
+
+@app.route("/planner/complete/<int:task_id>", methods=["POST"])
+@login_required
+def complete_planner_task(task_id):
+    complete_task(current_user_id(), task_id)
+    record(current_user_id(), "planner_task", 5)
+    return redirect(url_for("planner"))
 
 
 @app.errorhandler(413)
