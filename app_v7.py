@@ -85,7 +85,8 @@ def planner():
     return render_template("planner_v7.html", form=form, plan=plan, plan_json=json.dumps(plan["plan"]) if plan else "[]", start_date=date.today().isoformat(), tasks=tasks, error=error, grades=grade_options())
 
 
-@app.route("/planner/complete/<int:task_id>", methods=["POST"])
+# Use a unique endpoint because app_v5 already owns this completion endpoint.
+@app.route("/planner/complete/<int:task_id>", methods=["POST"], endpoint="complete_planner_task_v7")
 @login_required
 def complete_planner_task(task_id):
     uid = v7_user()
