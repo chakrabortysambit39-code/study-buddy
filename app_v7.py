@@ -1,12 +1,13 @@
+import json
 import os
 from io import BytesIO
-from datetime import date
+from datetime import date, timedelta
 
-from flask import render_template, request, redirect, url_for, session, send_file, flash
+from flask import render_template, request, redirect, url_for, send_file, flash
 
 from app_v5 import app, current_user_id, login_required, grade_options
 from services.database import connection, DatabaseNotConfigured
-from services.v7 import ensure_v7_tables, focus_summary, save_focus, achievement_list, unlock_achievements
+from services.v7 import ensure_v7_tables, focus_summary, save_focus, unlock_achievements
 from services.progress import record, stats
 from services.notes import list_notes
 from services.groq_ai import ai
@@ -29,7 +30,12 @@ def notes_search(user_id, query=""):
         return conn.execute("SELECT id,title,subject,content,created_at FROM notes WHERE user_id=%s ORDER BY created_at DESC", (user_id,)).fetchall()
 
 
-def smart_reminders(user_id, user_stats, tasks):
+def planner_tasks(user_id):
+    with connection() as conn:
+        return conn.execute("SELECT id,task_date,subject,topic,minutes,action,completed FROM study_tasks WHERE user_id=%s ORDER BY task_date,id", (user_id,)).fetchall()
+
+
+def smart_reminders(user_stats, tasks):
     reminders = []
     if user_stats["streak"] == 0:
         reminders.append("Start a study session today to build your streak.")
@@ -41,6 +47,69 @@ def smart_reminders(user_id, user_stats, tasks):
     if incomplete:
         reminders.append(f"You have {len(incomplete)} unfinished study task(s) in your planner.")
     return reminders
+
+
+def generate_study_plan(grade, subjects, exam_date, daily_minutes, goal):
+    client = ai._get_client()
+    if not client:
+        return None, "Groq AI is not configured yet."
+    schema = {"type":"object","properties":{"plan":{"type":"array","items":{"type":"object","properties":{"day":{"type":"integer"},"subject":{"type":"string"},"topic":{"type":"string"},"minutes":{"type":"integer"},"action":{"type":"string"}},"required":["day","subject","topic","minutes","action"],"additionalProperties":False}}},"required":["plan"],"additionalProperties":False}
+    prompt = f"Create a practical 7-day study plan for Grade {grade}. Subjects: {subjects}. Exam date: {exam_date}. Maximum daily study time: {daily_minutes} minutes. Goal: {goal}. Balance learning, revision, practice and self-testing. Keep each day within the time limit. Return exactly 7 days and only JSON matching the schema."
+    try:
+        response = client.chat.completions.create(model=ai.model, messages=[{"role":"system","content":"You are Study Buddy's expert study planner."},{"role":"user","content":prompt}], response_format={"type":"json_schema","json_schema":{"name":"study_plan","strict":True,"schema":schema}}, temperature=0.3, max_completion_tokens=1800)
+        data = json.loads(response.choices[0].message.content or "{}")
+        if len(data.get("plan", [])) != 7:
+            return None, "The AI did not return a complete 7-day plan. Please try again."
+        return data, None
+    except Exception as exc:
+        print(f"Study plan generation error: {exc}")
+        return None, "I couldn't generate the study plan right now. Please try again."
+
+
+@app.route("/planner", methods=["GET", "POST"])
+@login_required
+def planner():
+    uid = v7_user()
+    error = None
+    plan = None
+    form = {"grade": request.form.get("grade", "7"), "subjects": request.form.get("subjects", "Science, Maths"), "exam_date": request.form.get("exam_date", ""), "daily_minutes": request.form.get("daily_minutes", "60"), "goal": request.form.get("goal", "Prepare for my exams")}
+    if request.method == "POST":
+        if request.form.get("action") == "save":
+            try:
+                start = date.fromisoformat(request.form.get("start_date"))
+                raw = json.loads(request.form.get("plan_json", "[]"))
+                with connection() as conn:
+                    conn.execute("DELETE FROM study_tasks WHERE user_id=%s AND task_date >= %s", (uid, start))
+                    for item in raw[:7]:
+                        conn.execute("INSERT INTO study_tasks (user_id,task_date,subject,topic,minutes,action) VALUES (%s,%s,%s,%s,%s,%s)", (uid, start + timedelta(days=int(item["day"])-1), item["subject"], item["topic"], max(1,int(item["minutes"])), item["action"]))
+                record(uid, "planner", 20)
+                return redirect(url_for("planner"))
+            except Exception as exc:
+                print(f"Planner save error: {exc}")
+                error = "Could not save the plan. Please try again."
+        else:
+            if not form["exam_date"]:
+                error = "Choose an exam date."
+            else:
+                try:
+                    daily = max(15, min(240, int(form["daily_minutes"])))
+                except ValueError:
+                    daily = 60
+                plan, error = generate_study_plan(form["grade"], form["subjects"], form["exam_date"], daily, form["goal"])
+    tasks = planner_tasks(uid)
+    return render_template("planner_v7.html", form=form, plan=plan, plan_json=json.dumps(plan["plan"]) if plan else "[]", start_date=date.today().isoformat(), tasks=tasks, error=error, grades=grade_options())
+
+
+@app.route("/planner/complete/<int:task_id>", methods=["POST"])
+@login_required
+def complete_planner_task(task_id):
+    uid = v7_user()
+    with connection() as conn:
+        task = conn.execute("SELECT completed FROM study_tasks WHERE id=%s AND user_id=%s", (task_id, uid)).fetchone()
+        if task and not task["completed"]:
+            conn.execute("UPDATE study_tasks SET completed=TRUE WHERE id=%s AND user_id=%s", (task_id, uid))
+            record(uid, "planner_task", 15)
+    return redirect(url_for("planner"))
 
 
 @app.route("/focus", methods=["GET", "POST"])
@@ -65,10 +134,11 @@ def analytics():
     uid = v7_user()
     user_stats = stats(uid)
     focus_data = focus_summary(uid)
+    tasks = planner_tasks(uid)
     with connection() as conn:
         subject_rows = conn.execute("SELECT subject, COUNT(*) AS notes FROM notes WHERE user_id=%s GROUP BY subject ORDER BY notes DESC", (uid,)).fetchall()
     achievements = unlock_achievements(uid, user_stats, len(list_notes(uid)), focus_data["minutes"])
-    return render_template("analytics.html", stats=user_stats, focus=focus_data, subjects=subject_rows, achievements=achievements)
+    return render_template("analytics.html", stats=user_stats, focus=focus_data, subjects=subject_rows, achievements=achievements, reminders=smart_reminders(user_stats, tasks))
 
 
 @app.route("/achievements")
@@ -150,7 +220,6 @@ def v7_context():
     return {"v7_enabled": True}
 
 
-# V7 error page remains usable if PostgreSQL is temporarily unavailable.
 @app.errorhandler(DatabaseNotConfigured)
 def v7_database_error(_error):
     return render_template("database_error.html"), 503
